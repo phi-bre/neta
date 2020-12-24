@@ -1,25 +1,36 @@
-import highlight from 'highlight.js';
-import { global, html, state } from 'neta/src';
-import readme from 'neta/README.md';
+import { global, html, state } from '../../src';
+import readme from '../../README.md';
 
 window.html = html;
 window.state = state;
 
-const background = state('#242628');
-const color = state('#fff');
+const dark = state(false);
+const background = dark.then(dark => dark ? '#242628' : '#f5f5f5');
+const shade = dark.then(dark => dark ? '#292d2e' : '#fff');
+const color = dark.then(dark => dark ? '#f5f5f5' : '#242628');
 
 global({
+    '*': {
+        transition: 'background-color 0.2s, color 0.1s',
+    },
     body: {
         backgroundColor: background,
         color: color,
-        transition: 'background-color 0.2s, color 0.2s',
+    },
+    code: {
+        backgroundColor: shade,
+        color: color,
+    },
+    'pre code': {
+        backgroundColor: '#292d2e',
+        color: '#e5e5e5',
     },
 });
 
 const app = html({
     styles: {
         fontFamily: '"Montserrat", sans-serif',
-        maxWidth: '900px',
+        maxWidth: '1000px',
         marginRight: 'auto',
         marginLeft: 'auto',
         padding: '48px',
@@ -27,21 +38,19 @@ const app = html({
     html: readme,
 });
 
-app.mount('body');
+app.mount(document.body);
 
 document.querySelector('h1').addEventListener('click', () => {
-    const temp = background.value;
-    background.set(color.value);
-    color.set(temp);
+    dark.set(!dark.value);
 })
 
 const block = html({
     styles: {
         padding: '32px',
-        backgroundColor: color,
         width: '40%',
-        color: background,
         borderRadius: '4px',
+        backgroundColor: 'white',
+        color: 'initial',
     },
 });
 
@@ -52,9 +61,17 @@ document.querySelectorAll('code.language-js').forEach(code => {
         parent.innerHTML = '';
         try {
             eval(code.innerText);
+            // highlight.highlightBlock(code);
         } catch (e) {
             parent.innerHTML = e;
         }
     }, false);
     code.dispatchEvent(new Event('input'));
+});
+
+document.querySelectorAll('[id]').forEach(heading => {
+    heading.addEventListener('click', () => {
+        location.hash = heading.id;
+        navigator.clipboard.writeText(location);
+    });
 });

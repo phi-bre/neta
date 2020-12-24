@@ -2,9 +2,9 @@
 <p align="center">A lightweight JS framework powered by the prototype chain.</p>
 
 ## Introduction
-The aim of `neta` (Japanese for the topping of sushi, usually the fish part of nigiri) is to provide a JS only framework
-for the modern web. Other frameworks rely on some special markup language, like JSX, or lack the ability to seamlessly
-integrate dynamic CSS depending on component state. A nice side effect of this is that `neta` and all of its features 
+The aim of `neta` (ネタ — Japanese for the topping of sushi, usually the fish part of nigiri) is to provide a JS only 
+framework for the modern web. Other frameworks rely on some special markup language, like JSX, or lack the ability to 
+seamlessly integrate dynamic CSS depending on component state. A nice side effect of this is that `neta` and all of its features 
 can be used without the need for compilation.
 
 ## Getting Started
@@ -45,19 +45,24 @@ To abstract certain functionalities you can wrap your `descriptor` in a function
 or make invocations only when you actually need them.
 
 ```js
-function icon({ path }) {
+function icon({ url }) {
     // Do something
     return html({
         tag: 'img',
         attributes: {
             src: url,
         },
+        styles: {
+            width: '100%',
+        },
     });
 }
 
 const app = html({
     children: [
-        icon({ url: 'https://picsum.photos/200/300' }),
+        icon({ 
+            url: 'https://picsum.photos/200/300',
+        }),
     ],
 });
 app.mount(parent);
