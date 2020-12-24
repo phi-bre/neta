@@ -4,21 +4,15 @@ import { NetaCSS } from './css';
 import { NetaHTML } from './html';
 import { NetaSVG } from './svg';
 
-export interface NetaObserver<T, R = void> {
-    (value: T, prev: T): R;
-}
+export type NetaObserver<T, R = void> = (value: T, prev: T) => R;
+export type NetaMountable = { mount(parent: ParentNode): ChildNode };
+export type NetaExtendable<D> = { extend(descriptor: D): NetaExtendable<D> };
+export type NetaCallable<T extends NetaExtendable<T>> = T & { (descriptor: Partial<T>): NetaCallable<T> };
+export type NetaChild = NetaMountable | Node | string | number | boolean | null | undefined;
 
-export function html(descriptor: Partial<NetaHTML>) {
-    return neta(new NetaHTML())({ tag: 'div' })(descriptor) as unknown as typeof html & NetaHTML;
-}
-
-export function svg(descriptor: Partial<NetaSVG>) {
-    return neta(new NetaSVG())({ tag: 'svg' })(descriptor) as unknown as NetaSVG & typeof svg;
-}
-
-export function style(descriptor: Partial<NetaCSS>) {
-    return neta(new NetaCSS())(descriptor) as unknown as NetaCSS & typeof html;
-}
+export const html = neta(new NetaHTML())({ tag: 'div' });
+export const svg = neta(new NetaSVG())({ tag: 'svg' });
+export const style = neta(new NetaCSS());
 
 export function global(descriptor: Record<string, Partial<NetaCSS>>) {
     return NetaCSS.global(descriptor);
