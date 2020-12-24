@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import { NetaExtendable, NetaChild, NetaMountable, NetaObserver } from './index';
 import { define, extend, neta } from './core';
 import { ids, NetaCSS } from './css';
@@ -17,7 +16,7 @@ export class NetaElement<M, E extends Element> implements NetaMountable, NetaExt
     public html?: string | PromiseLike<string>;
     public text?: string | PromiseLike<string>;
     public attributes: { [P in keyof E]?: E[P] extends (string | number | boolean) ? (E[P] | PromiseLike<E[P]>) : never };
-    public styles: Partial<CSSProperties>;
+    public styles: object;
     public created: NetaObserver<E>;
     public mounted: NetaObserver<E>;
     public destroyed: NetaObserver<E>;
