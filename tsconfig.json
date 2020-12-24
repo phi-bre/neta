@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "./dist",
+    "outDir": "./dist",
+    "module": "ES2015",
+    "target": "ES2015",
+    "sourceMap": true
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

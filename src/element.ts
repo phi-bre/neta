@@ -1,8 +1,6 @@
-import type { CSSProperties } from 'react';
+import { NetaExtendable, NetaChild, NetaMountable, NetaObserver } from './index';
 import { define, extend, neta } from './core';
-import { NetaCSS, ids } from './css';
-import { NetaObserver } from './index';
-import { NetaObservable } from './observable';
+import { ids, NetaCSS } from './css';
 
 export const styles: unique symbol = Symbol('neta:style');
 export const attributes: unique symbol = Symbol('neta:attribute');
@@ -10,15 +8,15 @@ export const created: unique symbol = Symbol('neta:created');
 export const mounted: unique symbol = Symbol('neta:mounted');
 export const destroyed: unique symbol = Symbol('neta:destroyed');
 
-export class NetaElement<M, E = M[keyof M]> {
-    public extend = extend;
-    public define = define;
-    public tag: keyof M;
-    public children: Array<NetaObservable<Node | string | number> | Node | string | number>;
-    public html: string;
-    public text: string;
-    public attributes: Partial<E>;
-    public styles: Partial<CSSProperties>;
+export class NetaElement<M, E extends Element> implements NetaMountable, NetaExtendable<NetaElement<M, E>> {
+    public readonly extend = extend;
+    public readonly define = define;
+    public readonly tag: keyof M;
+    public children: Array<NetaChild | PromiseLike<NetaChild>>;
+    public html?: string | PromiseLike<string>;
+    public text?: string | PromiseLike<string>;
+    public attributes: { [P in keyof E]?: E[P] extends (string | number | boolean) ? (E[P] | PromiseLike<E[P]>) : never };
+    public styles: object;
     public created: NetaObserver<E>;
     public mounted: NetaObserver<E>;
     public destroyed: NetaObserver<E>;
@@ -27,8 +25,8 @@ export class NetaElement<M, E = M[keyof M]> {
         this.children = [];
         const method = (property, value) => property.concat([value]);
         const property = (property, value) => property.extend(value);
-        this.define('styles', styles, neta(new NetaCSS()), property, { enumerable: true });
-        this.define('attributes', attributes, neta(), property, { enumerable: true });
+        this.define('styles', styles, new NetaCSS(), property, { enumerable: true });
+        this.define('attributes', attributes, neta({ extend }) as any, property, { enumerable: true });
         this.define('created', created, [], method);
         this.define('mounted', mounted, [], method);
         this.define('destroyed', destroyed, [], method);
@@ -56,37 +54,32 @@ export class NetaElement<M, E = M[keyof M]> {
             });
         }
         for (const child of this.children) {
-            if (typeof child?.mount === 'function') {
-                child.mount(element);
-            } else if (typeof child?.then === 'function') {
-                new ManagedElement(child).mount(element);
+            if (typeof (child as NetaMountable)?.mount === 'function') {
+                (child as NetaMountable).mount(element);
+            } else if (typeof (child as PromiseLike<NetaChild>)?.then === 'function') {
+                new ManagedElement(child as PromiseLike<NetaChild>).mount(element);
             } else {
-                element.append(child);
+                element.append(child as string | Node);
             }
         }
         this[created].forEach(hook => hook.call(this, element));
         return element;
     }
 
-    public mount(selector: string | Element, replace = false) {
-        const parent = typeof selector === 'string' ? document.querySelector(selector) : selector;
+    public mount(parent: ParentNode): E {
         const element = this.create();
-        if (replace) {
-            parent.replaceWith(element);
-        } else {
-            parent.append(element);
-        }
+        parent.append(element);
         this[mounted].forEach(hook => hook.call(this, element));
         return element;
     }
 
-    public destroy(element) {
+    public destroy(element: E) {
         this[destroyed].forEach(hook => hook.call(this, element));
         return this;
     }
 }
 
-export class ManagedElement<T extends { then }> {
+export class ManagedElement<T extends PromiseLike<NetaChild>> implements NetaMountable {
     public anchor: ChildNode;
     public value: T;
 
@@ -99,11 +92,11 @@ export class ManagedElement<T extends { then }> {
         this.value.then(child => {
             if (!child) {
                 this.anchor = document.createTextNode('');
-            } else if (typeof child.mount === 'function') {
-                this.anchor = child.mount(this.anchor, true);
+            } else if (typeof (child as NetaMountable).mount === 'function') {
+                this.anchor = (child as NetaMountable).mount(this.anchor as any);
             } else {
-                this.anchor = typeof child !== 'object' ? document.createTextNode(child.toString()) : child;
-                this.anchor.replaceWith(this.anchor = child);
+                this.anchor = typeof child !== 'object' ? document.createTextNode(child.toString()) : child as ChildNode;
+                this.anchor.replaceWith(this.anchor = child as ChildNode);
             }
         });
         parent.append(this.anchor);

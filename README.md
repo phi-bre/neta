@@ -1,10 +1,10 @@
-# `neta`
-A lightweight JS framework powered by the prototype chain.
+<h1 align="center"><code>neta</code></h1>
+<p align="center">A lightweight JS framework powered by the prototype chain.</p>
 
 ## Introduction
-The aim of `neta` (Japanese for the topping of sushi, usually the fish part of nigiri) is to provide a JS only framework
-for the modern web. Other frameworks rely on some special markup language, like JSX, or lack the ability to seamlessly
-integrate dynamic CSS depending on component state. A nice side effect of this is that `neta` and all of its features 
+The aim of `neta` (ネタ — Japanese for the topping of sushi, usually the fish part of nigiri) is to provide a JS only 
+framework for the modern web. Other frameworks rely on some special markup language, like JSX, or lack the ability to 
+seamlessly integrate dynamic CSS depending on component state. A nice side effect of this is that `neta` and all of its features 
 can be used without the need for compilation.
 
 ## Getting Started
@@ -16,11 +16,12 @@ word for an object containing all information about the Element. This object wil
 `descriptor`. This way we can define certain properties like styling, attributes, children, etc. or override them from 
 other descriptions.
 
-Hint: `neta` relies on the prototype chain to extend partials. This means, property lookups are run natively :tada:
+Hint: `neta` relies on the prototype chain to extend partials. This means, property lookups are run natively 🎉
 
 Simple element creation:
 ```js
 const app = html({ text: 'Hello World!' });
+app.mount(parent);
 ```
 
 ### Partials
@@ -30,12 +31,13 @@ You can partially apply a `descriptor` and reuse it wherever you want.
 const div = html({ tag: 'div' });
 const app = div({
     styles: {
-        color: 'blue',
+        color: '#5dadff',
     },
     children: [
         div({ text: 'Hello World!' }),
     ],
 });
+app.mount(parent);
 ```
 
 ### Components
@@ -43,19 +45,27 @@ To abstract certain functionalities you can wrap your `descriptor` in a function
 or make invocations only when you actually need them.
 
 ```js
-const icon = ({ path }) => {
+function icon({ url }) {
     // Do something
     return html({
         tag: 'img',
-        src: 'https://cat.photos/' + path,
+        attributes: {
+            src: url,
+        },
+        styles: {
+            width: '100%',
+        },
     });
 }
 
 const app = html({
     children: [
-        icon({ path: 'nyan-cat.png' }),
+        icon({ 
+            url: 'https://picsum.photos/200/300',
+        }),
     ],
 });
+app.mount(parent);
 ```
 
 ## Reactivity
@@ -64,9 +74,10 @@ An observable can be a `Promise`, a value of your choosing wrapped in the provid
 implements a `then` function similar to a `Promise` really.
 
 ```js
-const text = state('hello');
-const app = html({ text });
-text.set('world!');
+const message = state('hello');
+const app = html({ text: message });
+message.set('world!');
+app.mount(parent);
 ```
 
 ## Styling
