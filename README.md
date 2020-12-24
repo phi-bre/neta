@@ -21,6 +21,7 @@ Hint: `neta` relies on the prototype chain to extend partials. This means, prope
 Simple element creation:
 ```js
 const app = html({ text: 'Hello World!' });
+app.mount(parent);
 ```
 
 ### Partials
@@ -30,12 +31,13 @@ You can partially apply a `descriptor` and reuse it wherever you want.
 const div = html({ tag: 'div' });
 const app = div({
     styles: {
-        color: 'blue',
+        color: '#5dadff',
     },
     children: [
         div({ text: 'Hello World!' }),
     ],
 });
+app.mount(parent);
 ```
 
 ### Components
@@ -43,11 +45,13 @@ To abstract certain functionalities you can wrap your `descriptor` in a function
 or make invocations only when you actually need them.
 
 ```js
-const icon = ({ path }) => {
+function icon({ path }) {
     // Do something
     return html({
         tag: 'img',
-        src: 'https://cat.photos/' + path,
+        attributes: {
+            src: 'https://cat.photos/' + path,
+        },
     });
 }
 
@@ -56,6 +60,7 @@ const app = html({
         icon({ path: 'nyan-cat.png' }),
     ],
 });
+app.mount(parent);
 ```
 
 ## Reactivity
@@ -64,9 +69,10 @@ An observable can be a `Promise`, a value of your choosing wrapped in the provid
 implements a `then` function similar to a `Promise` really.
 
 ```js
-const text = state('hello');
-const app = html({ text });
-text.set('world!');
+const message = state('hello');
+const app = html({ text: message });
+message.set('world!');
+app.mount(parent);
 ```
 
 ## Styling

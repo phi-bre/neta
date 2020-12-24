@@ -10,7 +10,7 @@ export class NetaCSS {
     public readonly id: number;
 
     public constructor() {
-        this.define('id', ids, '', (property, value) => property + value);
+        this.define('id', ids, '', (property, value) => property + value, { enumerable: false });
     }
 
     private static identifier(index: number) {
@@ -28,7 +28,13 @@ export class NetaCSS {
         let body = '', nested = [];
         for (const key in descriptor) {
             const type = typeof descriptor[key];
-            if (type === 'object') {
+            if (type === 'object' && typeof descriptor[key].then === 'function') {
+                const node = new Text(`${selector}{${snake(key)}:${descriptor[key].value}}`);
+                descriptor[key].then(value => {
+                    return node.textContent = `${selector}{${snake(key)}:${value}}`;
+                });
+                nested.push(node);
+            } else if (type === 'object') {
                 nested.push(...this.append.apply(this,
                     key.startsWith('@')
                         ? [descriptor[key], selector, key]

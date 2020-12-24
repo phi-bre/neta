@@ -5,6 +5,105 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>neta</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: "Montserrat", sans-serif;
+            margin-bottom: 16px;
+        }
+
+        p {
+            line-height: 24px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #5dadff;
+            transition: 0.2s;
+        }
+
+        a:hover {
+            opacity: 0.8;
+        }
+
+        pre {
+            display: flex;
+        }
+
+        /* HIGHLIGHT JS */
+        .hljs {
+            display: block;
+            width: 60%;
+            font-size: 14px;
+            font-family: Consolas, sans-serif;
+            overflow-x: auto;
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 4px;
+            background: #292d2e;
+        }
+        .hljs {
+            color: #bababa
+        }
+        .hljs-strong,
+        .hljs-emphasis {
+            color: #a8a8a2
+        }
+        .hljs-bullet,
+        .hljs-quote,
+        .hljs-link,
+        .hljs-number {
+            color: #6896ba
+        }
+        .hljs-code,
+        .hljs-selector-class {
+            color: #E8BF6A
+        }
+        .hljs-emphasis {
+            font-style: italic
+        }
+        .hljs-keyword,
+        .hljs-selector-tag,
+        .hljs-section,
+        .hljs-attribute,
+        .hljs-name,
+        .hljs-variable,
+        .hljs-literal {
+            color: #cb7832
+        }
+        .hljs-params {
+            color: #b9b9b9
+        }
+        .hljs-string,
+        .hljs-regexp {
+            color: #6a8759
+        }
+        .hljs-subst,
+        .hljs-type,
+        .hljs-built_in,
+        .hljs-builtin-name,
+        .hljs-symbol,
+        .hljs-selector-id,
+        .hljs-selector-attr,
+        .hljs-selector-pseudo,
+        .hljs-template-tag,
+        .hljs-template-variable,
+        .hljs-addition {
+            color: #E8BF6A
+        }
+        .hljs-comment,
+        .hljs-deletion,
+        .hljs-meta {
+            color: #7f7f7f
+        }
+    </style>
 </head>
 <body>
 <script src="./src/app.ts"></script>

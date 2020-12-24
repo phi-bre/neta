@@ -10,9 +10,11 @@ export class NetaObservable<T> {
     }
 
     public set(value: T) {
-        for (const observer of this.observers) {
-            observer(value, this.value);
-        }
+        this.observers.forEach(observer => observer(value, this.value))
+        // for (const observer of this.observers) {
+        //     console.log(observer)
+        //     observer(value, this.value);
+        // }
         // if (typeof value === 'object') {
         //     for (const key in value) {
         //         if (key in this) {
