@@ -1,5 +1,5 @@
-# `neta`
-A lightweight JS framework powered by the prototype chain.
+<h1 align="center"><code>neta</code></h1>
+<p align="center">A lightweight JS framework powered by the prototype chain.</p>
 
 ## Introduction
 The aim of `neta` (Japanese for the topping of sushi, usually the fish part of nigiri) is to provide a JS only framework
@@ -50,14 +50,14 @@ function icon({ path }) {
     return html({
         tag: 'img',
         attributes: {
-            src: 'https://cat.photos/' + path,
+            src: url,
         },
     });
 }
 
 const app = html({
     children: [
-        icon({ path: 'nyan-cat.png' }),
+        icon({ url: 'https://picsum.photos/200/300' }),
     ],
 });
 app.mount(parent);

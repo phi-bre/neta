@@ -29,7 +29,7 @@ const app = html({
 
 app.mount('body');
 
-window.addEventListener('click', () => {
+document.querySelector('h1').addEventListener('click', () => {
     const temp = background.value;
     background.set(color.value);
     color.set(temp);
@@ -38,11 +38,23 @@ window.addEventListener('click', () => {
 const block = html({
     styles: {
         padding: '32px',
+        backgroundColor: color,
+        width: '40%',
+        color: background,
+        borderRadius: '4px',
     },
 });
 
 document.querySelectorAll('code.language-js').forEach(code => {
-    window.parent = block.mount(code.parentElement);
-    eval(code.innerText);
-    highlight.highlightBlock(code);
+    const parent = window.parent = block.mount(code.parentElement);
+    code.setAttribute('contenteditable', true);
+    code.addEventListener('input', () => {
+        parent.innerHTML = '';
+        try {
+            eval(code.innerText);
+        } catch (e) {
+            parent.innerHTML = e;
+        }
+    }, false);
+    code.dispatchEvent(new Event('input'));
 });
