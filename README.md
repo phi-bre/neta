@@ -16,7 +16,7 @@ word for an object containing all information about the Element. This object wil
 `descriptor`. This way we can define certain properties like styling, attributes, children, etc. or override them from 
 other descriptions.
 
-Hint: `neta` relies on the prototype chain to extend partials. This means, property lookups are run natively :tada:
+Hint: `neta` relies on the prototype chain to extend partials. This means, property lookups are run natively 🎉
 
 Simple element creation:
 ```js

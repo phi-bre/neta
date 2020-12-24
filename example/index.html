@@ -5,22 +5,27 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>neta</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500&family=Fira+Sans:ital,wght@0,400;0,500;1,400&display=swap">
     <style>
         * {
             padding: 0;
             margin: 0;
             box-sizing: border-box;
+            font-family: 'Fira Sans', sans-serif;
             -moz-osx-font-smoothing: grayscale;
             -webkit-font-smoothing: antialiased;
         }
 
         h1, h2, h3, h4, h5, h6 {
-            font-family: "Montserrat", sans-serif;
+            font-family: 'Montserrat', sans-serif;
+            margin-top: 32px;
             margin-bottom: 16px;
         }
 
         p {
-            line-height: 24px;
+            font-size: 16px;
+            margin-bottom: 16px;
+            line-height: 28px;
         }
 
         a {
@@ -37,12 +42,19 @@
             display: flex;
         }
 
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #292d2e;
+            border-radius: 4px;
+            padding: 2px 6px;
+            color: white;
+        }
+
         /* HIGHLIGHT JS */
         .hljs {
             display: block;
             width: 60%;
-            font-size: 14px;
-            font-family: Consolas, sans-serif;
+            font-size: 16px;
             overflow-x: auto;
             padding: 16px;
             margin: 16px 0;
@@ -106,6 +118,6 @@
     </style>
 </head>
 <body>
-<script src="./src/app.ts"></script>
+<script src="./src/app.js"></script>
 </body>
 </html>

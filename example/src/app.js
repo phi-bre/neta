@@ -1,15 +1,14 @@
 import highlight from 'highlight.js';
-import { html, state } from '../../src';
-import { NetaCSS } from '../../src/css';
-import readme from '../../README.md';
+import { global, html, state } from 'neta/src';
+import readme from 'neta/README.md';
 
-(window as any).html = html;
-(window as any).state = state;
+window.html = html;
+window.state = state;
 
 const background = state('#242628');
 const color = state('#fff');
 
-NetaCSS.global({
+global({
     body: {
         backgroundColor: background,
         color: color,
@@ -30,10 +29,8 @@ const app = html({
 
 app.mount('body');
 
-background.then(console.log)
-
 window.addEventListener('click', () => {
-    let temp = background.value;
+    const temp = background.value;
     background.set(color.value);
     color.set(temp);
 })
@@ -44,8 +41,8 @@ const block = html({
     },
 });
 
-document.querySelectorAll('code.language-js').forEach((code: HTMLElement) => {
-    (window as any).parent = block.mount(code.parentElement);
+document.querySelectorAll('code.language-js').forEach(code => {
+    window.parent = block.mount(code.parentElement);
     eval(code.innerText);
     highlight.highlightBlock(code);
 });

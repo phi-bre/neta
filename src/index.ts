@@ -20,6 +20,10 @@ export function style(descriptor: Partial<NetaCSS>) {
     return neta(new NetaCSS())(descriptor) as unknown as NetaCSS & typeof html;
 }
 
+export function global(descriptor: Record<string, Partial<NetaCSS>>) {
+    return NetaCSS.global(descriptor);
+}
+
 export function media(value: object): string {
     return `@media screen and (${Object.keys(value).map(key => snake(key) + ':' + value[key]).join(';')})`;
 }
