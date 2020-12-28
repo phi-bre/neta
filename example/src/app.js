@@ -1,23 +1,24 @@
-import { global, html, state } from '../../src';
+import { html, styles, state } from '../../src';
 import readme from '../../README.md';
 
 window.html = html;
 window.state = state;
+window.styles = styles;
 
 const dark = state(false);
 const background = dark.then(dark => dark ? '#242628' : '#f5f5f5');
 const shade = dark.then(dark => dark ? '#292d2e' : '#fff');
 const color = dark.then(dark => dark ? '#f5f5f5' : '#242628');
 
-global({
+styles.global({
     '*': {
         transition: 'background-color 0.2s, color 0.1s',
     },
-    body: {
+    'body': {
         backgroundColor: background,
         color: color,
     },
-    code: {
+    'code': {
         backgroundColor: shade,
         color: color,
     },

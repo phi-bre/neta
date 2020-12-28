@@ -1,30 +1,24 @@
-import { define, snake } from './core';
+import { compose, snake } from './core';
 
-export const ids: unique symbol = Symbol('neta:id');
+export const stylesheet = document.createElement('style');
 export const delimiter = '\u2060';
+export let index = 0;
 
-export class NetaCSS {
-    static index = 0;
-    static stylesheet = document.createElement('style');
-    public define = define;
-    public readonly id: number;
-
-    public constructor() {
-        this.define('id', ids, '', (property, value) => property + value, { enumerable: false });
-    }
-
-    private static identifier(index: number) {
-        return delimiter + index.toString(36) + delimiter;
-    }
-
-    public static global(descriptor: object) {
-        for (const key in descriptor) {
-            this.stylesheet.append(...this.append(descriptor[key], key));
+export const styles = compose({
+    'neta:id': '',
+    create(element: Element) {
+        if (this['neta:id']) {
+            element.setAttribute('neta', this['neta:id']);
         }
-    }
-
-    public static append(descriptor: object, selector?: string, at?: string): string[] {
-        selector ||= `[neta*="${NetaCSS.identifier(NetaCSS.index)}"]`;
+    },
+    extend(descriptor) {
+        const id = this['neta:id'] + (descriptor['neta:id'] || (delimiter + index.toString(36) + delimiter));
+        if (!id.endsWith(descriptor['neta:id'])) {
+            stylesheet.append(...this.append(descriptor, `[neta*="${delimiter + (index++).toString(36) + delimiter}"]`));
+        }
+        return Object.assign(Object.create(this), { ['neta:id']: id });
+    },
+    append(descriptor: object, selector?: string, at?: string): string[] {
         let body = '', nested = [];
         for (const key in descriptor) {
             const type = typeof descriptor[key];
@@ -48,13 +42,12 @@ export class NetaCSS {
             nested.unshift(at ? `${at}{${selector}{${body}}}` : `${selector}{${body}}`);
         }
         return nested;
-    }
+    },
+    global(descriptor: object) {
+        for (const key in descriptor) {
+            stylesheet.append(...this.append(descriptor[key], key));
+        }
+    },
+});
 
-    public extend(descriptor: object): this {
-        return Object.assign(Object.create(this), {
-            id: descriptor[ids]
-                || NetaCSS.stylesheet.append(...NetaCSS.append(descriptor))
-                || NetaCSS.identifier(NetaCSS.index++),
-        });
-    }
-}
+document.head.append(stylesheet);

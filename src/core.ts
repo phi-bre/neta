@@ -1,8 +1,16 @@
-import { NetaCallable, NetaExtendable, NetaObserver } from './index';
+import { NetaCallable, NetaExtendable } from './index';
 
-export function neta<P extends NetaExtendable<P>>(prototype: P): NetaCallable<P> {
-    const callable = descriptor => neta(prototype.extend(descriptor));
-    return Object.setPrototypeOf(callable, prototype);
+export function callable<P extends NetaExtendable<P>>(prototype: P): NetaCallable<P> {
+    const call = descriptor => callable(prototype.extend(descriptor));
+    return Object.setPrototypeOf(call, prototype);
+}
+
+export function compose(prototype): NetaCallable<any> {
+    (prototype as any).extend ||= extend;
+    for (const key in prototype) if ((prototype[key] as any).extend) {
+        define.call(prototype, key, prototype[key], true);
+    }
+    return callable(prototype);
 }
 
 export function extend<P extends object, D extends object>(this: P, descriptor: D): P {
@@ -11,19 +19,28 @@ export function extend<P extends object, D extends object>(this: P, descriptor: 
     return instance;
 }
 
-export function define<T>(key: string, symbol: symbol, value: T, action: NetaObserver<T>, descriptor?: PropertyDescriptor) {
+export function define<T>(key: string, value: T, enumerable = false) {
+    const symbol = 'neta:' + key;
     return Object.defineProperties(this, {
         [symbol]: { value, writable: true },
         [key]: {
-            enumerable: descriptor?.enumerable || false,
+            enumerable,
             set(value) {
-                this[symbol] = action(this[symbol], value);
+                this[symbol] = this[symbol]?.extend?.(value);
             },
             get() {
                 return this[symbol];
             },
         },
     });
+}
+
+export function normalize(attribute, action) {
+    if (typeof attribute?.then === 'function') {
+        attribute.then(action);
+    } else if (attribute) {
+        action(attribute);
+    }
 }
 
 export function snake(key: string) {
