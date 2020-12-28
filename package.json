@@ -1,13 +1,22 @@
 {
   "name": "@phibre/neta",
+  "description": "A lightweight JS framework powered by the prototype chain.",
   "version": "0.0.0",
+  "author": {
+    "name": "Philip Breuer",
+    "url": "https://phibre.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phi-bre/neta.git"
+  },
   "license": "MIT",
   "main": "dist/lib.js",
   "module": "dist/lib.es.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
-  "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -cw"
