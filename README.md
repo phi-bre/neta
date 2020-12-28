@@ -2,21 +2,20 @@
 <p align="center">A lightweight JS framework powered by the prototype chain.</p>
 
 ## Introduction
-The aim of `neta` (ネタ — Japanese for the topping of sushi, usually the fish part of nigiri) is to provide a JS only 
-framework for the modern web. Other frameworks rely on some special markup language, like JSX, or lack the ability to 
-seamlessly integrate dynamic CSS depending on component state. A nice side effect of this is that `neta` and all of its features 
-can be used without the need for compilation.
+`neta` ネタ — Japanese for the topping of sushi, usually the fish part of nigiri, provides a JS-only framework for the 
+modern web. Where other frameworks rely on some special markup language, like JSX, `neta` provides a simple and easy
+to use API in plain Javascript. No compilation needed!
 
 ## Getting Started
 Coming soon...
 
 ## Composition
 To tell `neta` how to render a DOM-Element, you provide it with something called a `descriptor`, which is just a fancy 
-word for an object containing all information about the Element. This object will then extend the previous declaration's
-`descriptor`. This way we can define certain properties like styling, attributes, children, etc. or override them from 
-other descriptions.
+word for an object containing all information about the desired Element. This object will then extend the previously
+defined `descriptor`. This way we can add certain properties like styling, attributes, children, etc. on one 
+element and override, mix or extend them in another.
 
-Hint: `neta` relies on the prototype chain to extend partials. This means, property lookups are run natively 🎉
+Note: `neta` relies on the prototype chain to extend partials. This means, property lookups are handled by the browser 🎉
 
 Simple element creation:
 ```js
@@ -24,15 +23,11 @@ const app = html({ text: 'Hello World!' });
 app.mount(parent);
 ```
 
-### Partials
-You can partially apply a `descriptor` and reuse it wherever you want.
-
+You can partially apply a `descriptor` and reuse it:
 ```js
 const div = html({ tag: 'div' });
-const app = div({
-    styles: {
-        color: '#5dadff',
-    },
+const red = html({ style: { color: 'orange' } });
+const app = div(red)({
     children: [
         div({ text: 'Hello World!' }),
     ],
@@ -46,7 +41,7 @@ or make invocations only when you actually need them.
 
 ```js
 function icon({ url }) {
-    // Do something
+    // Do something here
     return html({
         tag: 'img',
         attributes: {
@@ -69,15 +64,17 @@ app.mount(parent);
 ```
 
 ## Reactivity
-To let `neta` know whenever something changed you can pass it an observable instead of any attribute, style or child.
-An observable can be a `Promise`, a value of your choosing wrapped in the provided `state` function, or anything that 
-implements a `then` function similar to a `Promise` really.
+To let `neta` keep track of changes you can pass it an observable instead of any attribute, style or child.
+An observable can be a `Promise`, a value wrapped in the provided `state` function, or anything that implements a `then`
+function similar to a `Promise` really.
 
 ```js
-const message = state('hello');
-const app = html({ text: message });
-message.set('world!');
+const time = state();
+const app = html({ children: [time] });
 app.mount(parent);
+setInterval(() => {
+    time.set(new Date().toLocaleTimeString());
+}, 1000);
 ```
 
 ## Styling
