@@ -5,10 +5,10 @@ export function callable<P extends NetaExtendable<P>>(prototype: P): NetaCallabl
     return Object.setPrototypeOf(call, prototype);
 }
 
-export function compose(prototype): NetaCallable<any> {
-    (prototype as any).extend ||= extend;
-    for (const key in prototype) if ((prototype[key] as any).extend) {
-        define.call(prototype, key, prototype[key], true);
+export function compose<T extends NetaExtendable<T>>(prototype): NetaCallable<T> {
+    prototype.extend ||= extend;
+    for (const key in prototype) if (prototype[key].extend) {
+        define.call(prototype, key, prototype[key]);
     }
     return callable(prototype);
 }
@@ -19,12 +19,11 @@ export function extend<P extends object, D extends object>(this: P, descriptor: 
     return instance;
 }
 
-export function define<T>(key: string, value: T, enumerable = false) {
-    const symbol = 'neta:' + key;
+export function define<T>(key: string, value: T, symbol = 'neta:' + key) {
     return Object.defineProperties(this, {
         [symbol]: { value, writable: true },
         [key]: {
-            enumerable,
+            enumerable: true,
             set(value) {
                 this[symbol] = this[symbol]?.extend?.(value);
             },

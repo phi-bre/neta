@@ -1,4 +1,4 @@
-import { NetaChild, NetaMountable, styles } from './index';
+import { NetaChild, NetaElement, NetaMountable, styles } from './index';
 import { compose, normalize } from './core';
 
 export const attributes = compose({
@@ -37,8 +37,9 @@ export const hook = compose({
     },
 });
 
-export const element = compose({
-    attributes, styles, children, created: hook, mounted: hook, destroyed: hook,
+export const element = compose<NetaElement>({
+    attributes, styles, children,
+    created: hook, mounted: hook, destroyed: hook,
     create(element: Element) {
         this.styles.create(element);
         this.attributes.create(element);
@@ -63,7 +64,6 @@ export function managed(value, anchor?) {
         value,
         anchor: anchor || document.createTextNode(''),
         mount(parent: ParentNode) {
-            this.anchor ||= document.createTextNode('');
             this.value.then(child => {
                 if (!child) {
                     this.anchor = document.createTextNode('');

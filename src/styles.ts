@@ -1,24 +1,25 @@
+import { NetaStyles } from './index';
 import { compose, snake } from './core';
 
 export const stylesheet = document.createElement('style');
 export const delimiter = '\u2060';
 export let index = 0;
 
-export const styles = compose({
+export const styles = compose<NetaStyles>({
     'neta:id': '',
     create(element: Element) {
         if (this['neta:id']) {
             element.setAttribute('neta', this['neta:id']);
         }
     },
-    extend(descriptor) {
+    extend(descriptor: Partial<NetaStyles>) {
         const id = this['neta:id'] + (descriptor['neta:id'] || (delimiter + index.toString(36) + delimiter));
         if (!id.endsWith(descriptor['neta:id'])) {
             stylesheet.append(...this.append(descriptor, `[neta*="${delimiter + (index++).toString(36) + delimiter}"]`));
         }
         return Object.assign(Object.create(this), { ['neta:id']: id });
     },
-    append(descriptor: object, selector?: string, at?: string): string[] {
+    append(descriptor: Partial<NetaStyles>, selector?: string, at?: string): string[] {
         let body = '', nested = [];
         for (const key in descriptor) {
             const type = typeof descriptor[key];
@@ -43,7 +44,7 @@ export const styles = compose({
         }
         return nested;
     },
-    global(descriptor: object) {
+    global(descriptor: Record<string, Partial<NetaStyles>>) {
         for (const key in descriptor) {
             stylesheet.append(...this.append(descriptor[key], key));
         }
