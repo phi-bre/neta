@@ -1,91 +1,79 @@
-import { NetaChild, NetaElement, NetaMountable, styles } from './index';
-import { compose, normalize } from './core';
+import { NetaCreatable, NetaElement, styles } from './index';
+import { compose, normalize, text } from './core';
 
 export const attributes = compose({
     create(element: Element) {
         for (const key in this) {
-            normalize(this[key], value => {
-                if (typeof value === 'function') {
-                    element[key] = value;
-                } else {
-                    element.setAttribute(key, value.toString());
-                }
-            });
+            normalize(value => {
+                typeof value === 'function'
+                    ? element[key] = value
+                    : element.setAttribute(key, value.toString())
+            })(this[key]);
         }
     },
 });
 
-export const children = compose({
-    value: [],
+export const children = compose([])({
     create(element: Element) {
-        this.value.forEach(child => {
-            if (typeof (child as NetaMountable)?.mount === 'function') {
-                (child as NetaMountable).mount(element);
-            } else if (typeof (child as PromiseLike<NetaChild>)?.then === 'function') {
-                managed(child).mount(element);
-            } else {
-                element.append(child as string | Node);
-            }
-        });
+        element['neta:anchors'] = [];
+        this.forEach((value, index) => normalize((children, previous = []) => {
+            const length = [].concat(previous).length;
+            const fragment = document.createDocumentFragment();
+            fragment.append(...[].concat(children).map(child =>
+                typeof (child as NetaCreatable)?.create === 'function'
+                    ? (child as NetaCreatable).create()
+                    : child instanceof Node ? child : text(child)
+            ));
+            const anchor = fragment.firstChild;
+            for (let i = 1; i < length; i++) element.removeChild(element['neta:anchors'][index]?.nextSibling);
+            if (element['neta:anchors'][index]) element.replaceChild(fragment, element['neta:anchors'][index]);
+            else element.append(fragment);
+            element['neta:anchors'][index] = anchor;
+        })(value));
+    },
+    extend(descriptor: any) {
+        descriptor.extend = this.extend;
+        descriptor.create = this.create;
+        descriptor.insert = this.insert;
+        return descriptor;
     },
 });
 
-export const hook = compose({
-    value: [],
+export const hook = compose([])({
     extend(descriptor) {
-        return this.value.concat(descriptor);
+        return this.concat(descriptor);
     },
 });
 
 export const element = compose<NetaElement>({
     attributes, styles, children,
     created: hook, mounted: hook, destroyed: hook,
-    create(element: Element) {
+    create(element: Element): Element {
         this.styles.create(element);
         this.attributes.create(element);
         this.children.create(element);
-        this.created.value.forEach(hook => hook.call(this, element));
+        this.created.forEach(hook => hook.call?.(this, element));
         return element;
     },
-    mount(parent: ParentNode) {
-        const element = this.create();
+    mount(parent: Element) {
+        const element: Element = this.create();
         parent.append(element);
-        this.mounted.value.forEach(hook => hook.call(this, element));
+        // TODO: element.querySelectorAll('[neta]').forEach(child => {});
+        this.mounted.forEach(hook => hook.call?.(this, element));
         return element;
     },
     destroy(element: Element) {
-        this.destroyed.value.forEach(hook => hook.call(this, element));
+        this.destroyed.forEach(hook => hook.call?.(this, element));
         return element;
     },
 });
-
-export function managed(value, anchor?) {
-    return {
-        value,
-        anchor: anchor || document.createTextNode(''),
-        mount(parent: ParentNode) {
-            this.value.then(child => {
-                if (!child) {
-                    this.anchor = document.createTextNode('');
-                } else if (typeof (child as NetaMountable).mount === 'function') {
-                    this.anchor = (child as NetaMountable).mount(this.anchor as any);
-                } else {
-                    this.anchor = typeof child !== 'object' ? document.createTextNode(child.toString()) : child as ChildNode;
-                    this.anchor.replaceWith(this.anchor = child as ChildNode);
-                }
-            });
-            parent.append(this.anchor);
-            return this.anchor;
-        },
-    };
-}
 
 export const html = element({
     tag: 'div',
     create(el?: HTMLElement): HTMLElement {
         el ||= document.createElement(this.tag);
-        normalize(this.text, value => el.innerText = value);
-        normalize(this.html, value => el.innerHTML = value);
+        normalize(value => value ? el.innerText = value : null)(this.text);
+        normalize(value => value ? el.innerHTML = value : null)(this.html);
         return element.create.call(this, el);
     },
 });

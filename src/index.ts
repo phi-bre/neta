@@ -1,10 +1,11 @@
 export type NetaObserver<T, R = void> = (value: T, prev: T) => R;
 export type NetaMountable = { mount(parent: ParentNode): ChildNode };
-export type NetaCreatable = { create(parent: ParentNode): ChildNode };
+export type NetaCreatable = { create(parent?: ParentNode): ChildNode };
 export type NetaDestroyable = { destroy(parent: ParentNode): ChildNode };
 export type NetaExtendable<D> = { extend(descriptor: D): NetaExtendable<D> };
 export type NetaCallable<T extends NetaExtendable<T>> = T & { (descriptor: Partial<T>): NetaCallable<T> };
-export type NetaChild = PromiseLike<NetaChild> | NetaMountable | Node | string | number | boolean | null | undefined;
+export type NetaPrimitive = string | number | boolean | null | undefined;
+export type NetaChild = PromiseLike<NetaChild> | NetaMountable | Node | NetaPrimitive;
 export type NetaAttributes = NetaExtendable<Partial<HTMLElement | SVGElement>>;
 export type NetaStyles = NetaExtendable<Partial<CSSStyleDeclaration>>;
 

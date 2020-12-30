@@ -16,7 +16,7 @@ export class NetaObservable<T> implements PromiseLike<T> {
     }
 
     public then<R>(observer: NetaObserver<T, R>): NetaObservable<R | any> {
-        const observable = new NetaObservable(observer(this.value, this.value));
+        const observable = new NetaObservable(observer(this.value, undefined));
         this.observers.add(value => observable.set(observer(value, this.value)));
         return observable;
     }

@@ -1,4 +1,4 @@
-import { NetaCallable, NetaExtendable } from './index';
+import { NetaCallable, NetaExtendable, NetaPrimitive } from './index';
 
 export function callable<P extends NetaExtendable<P>>(prototype: P): NetaCallable<P> {
     const call = descriptor => callable(prototype.extend(descriptor));
@@ -25,7 +25,7 @@ export function define<T>(key: string, value: T, symbol = 'neta:' + key) {
         [key]: {
             enumerable: true,
             set(value) {
-                this[symbol] = this[symbol]?.extend?.(value);
+                this[symbol] = this[symbol].extend(value);
             },
             get() {
                 return this[symbol];
@@ -34,14 +34,18 @@ export function define<T>(key: string, value: T, symbol = 'neta:' + key) {
     });
 }
 
-export function normalize(attribute, action) {
-    if (typeof attribute?.then === 'function') {
-        attribute.then(action);
-    } else if (attribute) {
-        action(attribute);
-    }
+export function normalize(action: Function) {
+    return function <T>(value: T | PromiseLike<T>, ...args) {
+        return typeof (value as PromiseLike<T>)?.then === 'function'
+            ? (value as PromiseLike<T>).then(normalize(action))
+            : action(value, ...args);
+    };
 }
 
 export function snake(key: string) {
     return key.replace(/[A-Z]/g, '-$&').toLowerCase();
+}
+
+export function text(child: NetaPrimitive | PromiseLike<NetaPrimitive >) {
+    return document.createTextNode(((child !== true && child) || '').toString());
 }
