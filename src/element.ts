@@ -13,8 +13,8 @@ export const attributes = compose({
     },
 });
 
-export const children = compose([])({
-    create(element: Element) {
+export const children = compose<any>([])({
+    create(element: Element): Element {
         element['neta:anchors'] = [];
         this.forEach((value, index) => normalize((children, previous = []) => {
             const length = [].concat(previous).length;
@@ -24,12 +24,13 @@ export const children = compose([])({
                     ? (child as NetaCreatable).create()
                     : child instanceof Node ? child : text(child)
             ));
-            const anchor = fragment.firstChild;
-            for (let i = 1; i < length; i++) element.removeChild(element['neta:anchors'][index]?.nextSibling);
-            if (element['neta:anchors'][index]) element.replaceChild(fragment, element['neta:anchors'][index]);
+            const anchor = element['neta:anchors'][index];
+            element['neta:anchors'][index] = fragment.firstChild;
+            for (let i = 1; i < length; i++) element.removeChild(anchor?.nextSibling);
+            if (anchor) element.replaceChild(fragment, anchor);
             else element.append(fragment);
-            element['neta:anchors'][index] = anchor;
         })(value));
+        return element;
     },
     extend(descriptor: any) {
         descriptor.extend = this.extend;
