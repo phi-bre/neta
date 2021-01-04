@@ -26,7 +26,7 @@ app.mount(parent);
 You can partially apply a `descriptor` and reuse it:
 ```js
 const div = html({ tag: 'div' });
-const red = html({ style: { color: 'orange' } });
+const red = html({ styles: { color: 'red' } });
 const app = div(red)({
     children: [
         div({ text: 'Hello World!' }),
