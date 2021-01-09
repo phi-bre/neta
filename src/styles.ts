@@ -5,7 +5,7 @@ export const stylesheet = document.createElement('style');
 export const delimiter = '\u2060';
 export let index = 0;
 
-export const styles = compose<NetaStyles>({
+export const styles = compose({
     'neta:id': '',
     create(element: Element) {
         if (this['neta:id']) {
@@ -24,10 +24,8 @@ export const styles = compose<NetaStyles>({
         for (const key in descriptor) {
             const type = typeof descriptor[key];
             if (type === 'object' && typeof descriptor[key].then === 'function') {
-                const node = new Text(`${selector}{${snake(key)}:${descriptor[key].value}}`);
-                descriptor[key].then(value => {
-                    return node.textContent = `${selector}{${snake(key)}:${value}}`;
-                });
+                const node = document.createTextNode('');
+                descriptor[key].then(value => node.data = `${selector}{${snake(key)}:${value}}`);
                 nested.push(node);
             } else if (type === 'object') {
                 nested.push(...this.append.apply(this,
