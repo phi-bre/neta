@@ -1,4 +1,4 @@
-import {html, styles, state, global} from '../../src';
+import { global, html, state, styles } from '../../src';
 import readme from '../../README.md';
 
 window.html = html;

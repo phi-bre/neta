@@ -25,4 +25,5 @@ export type NetaElement = NetaCreatable & NetaMountable & NetaDestroyable & {
 };
 
 export { styles } from './styles';
+export { state } from './core';
 export * from './helpers';

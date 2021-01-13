@@ -18,7 +18,7 @@ export const styles = compose({
         instance.append(descriptor);
         return instance;
     },
-    append(descriptor) {
+    append(descriptor: Partial<NetaStyles>) {
         for (const key in descriptor) {
             state(descriptor[key]).then(value => {
                 if (typeof value === 'object') {
@@ -26,7 +26,6 @@ export const styles = compose({
                     || (value['neta:at'] = key.startsWith('@') ? key : '');
                     this.append(value);
                 } else if (!key.startsWith('neta:') && typeof value !== 'function') {
-                    console.log(descriptor['neta:selector'], value, typeof value !== 'function');
                     const rule = `${descriptor['neta:selector']}${descriptor['neta:pseudo'] || ''}{${snake(key)}:${value}}`;
                     stylesheet.append(descriptor['neta:at'] ? `${descriptor['neta:at']}{${rule}}` : rule);
                 }
