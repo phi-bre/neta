@@ -7,4 +7,4 @@ export const hooks = compose([])({
     call(self, ...args) {
         this.forEach(hook => hook.call?.(self, ...args));
     },
-});
+} as any);

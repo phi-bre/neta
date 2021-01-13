@@ -1,4 +1,4 @@
-import { html, styles, state } from '../../src';
+import {html, styles, state, global} from '../../src';
 import readme from '../../README.md';
 
 window.html = html;
@@ -10,7 +10,7 @@ const background = dark.then(dark => dark ? '#242628' : '#f5f5f5');
 const shade = dark.then(dark => dark ? '#292d2e' : '#fff');
 const color = dark.then(dark => dark ? '#f5f5f5' : '#242628');
 
-styles.global({
+global({
     '*': {
         transition: 'background-color 0.2s, color 0.1s',
     },
@@ -41,7 +41,7 @@ const app = html({
 
 app.mount(document.body);
 
-document.querySelector('h1').addEventListener('click', () => {
+document.querySelector('h1')?.addEventListener('click', () => {
     dark.set(!dark.value);
 })
 

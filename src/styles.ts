@@ -1,52 +1,36 @@
+import { compose, snake, state } from './core';
 import { NetaStyles } from './index';
-import { compose, snake } from './core';
 
-export const stylesheet = document.createElement('style');
-export const delimiter = '\u2060';
 export let index = 0;
+export const delimiter = '\u2060';
+export const stylesheet = document.createElement('style');
+document.head.append(stylesheet);
 
 export const styles = compose({
-    'neta:id': '',
+    'neta:selector': '',
     create(element: Element) {
-        if (this['neta:id']) {
-            element.setAttribute('neta', this['neta:id']);
-        }
+        element.setAttribute('neta', this['neta:selector']);
     },
     extend(descriptor: Partial<NetaStyles>) {
-        const id = this['neta:id'] + (descriptor['neta:id'] || (delimiter + index.toString(36) + delimiter));
-        if (!id.endsWith(descriptor['neta:id'])) {
-            stylesheet.append(...this.append(descriptor, `[neta*="${delimiter + (index++).toString(36) + delimiter}"]`));
-        }
-        return Object.assign(Object.create(this), { ['neta:id']: id });
+        const id = this['neta:selector'] + (descriptor['neta:selector'] || (delimiter + (index++).toString(36) + delimiter));
+        const instance = Object.assign(Object.create(this), { ['neta:selector']: id });
+        descriptor['neta:selector'] = `[neta*="${id}"]`;
+        instance.append(descriptor);
+        return instance;
     },
-    append(descriptor: Partial<NetaStyles>, selector?: string, at?: string): string[] {
-        let body = '', nested = [];
+    append(descriptor) {
         for (const key in descriptor) {
-            const type = typeof descriptor[key];
-            if (type === 'object' && typeof descriptor[key].then === 'function') {
-                const node = document.createTextNode('');
-                descriptor[key].then(value => node.data = `${selector}{${snake(key)}:${value}}`);
-                nested.push(node);
-            } else if (type === 'object') {
-                nested.push(...this.append.apply(this,
-                    key.startsWith('@')
-                        ? [descriptor[key], selector, key]
-                        : [descriptor[key], selector + ':' + key]
-                ));
-            } else if (type === 'string' || type === 'number') {
-                body += snake(key) + ':' + descriptor[key] + ';';
-            }
-        }
-        if (body) {
-            nested.unshift(at ? `${at}{${selector}{${body}}}` : `${selector}{${body}}`);
-        }
-        return nested;
-    },
-    global(descriptor: Record<string, Partial<NetaStyles>>) {
-        for (const key in descriptor) {
-            stylesheet.append(...this.append(descriptor[key], key));
+            state(descriptor[key]).then(value => {
+                if (typeof value === 'object') {
+                    (value['neta:pseudo'] = key.startsWith(':') ? key : '')
+                    || (value['neta:at'] = key.startsWith('@') ? key : '');
+                    this.append(value);
+                } else if (!key.startsWith('neta:') && typeof value !== 'function') {
+                    console.log(descriptor['neta:selector'], value, typeof value !== 'function');
+                    const rule = `${descriptor['neta:selector']}${descriptor['neta:pseudo'] || ''}{${snake(key)}:${value}}`;
+                    stylesheet.append(descriptor['neta:at'] ? `${descriptor['neta:at']}{${rule}}` : rule);
+                }
+            });
         }
     },
 });
-
-document.head.append(stylesheet);

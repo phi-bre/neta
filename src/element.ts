@@ -19,12 +19,12 @@ export const element = compose<NetaElement>({
         return element;
     },
     mounted: hooks,
-    mount(parent: Element, element?: Element) {
-        element ||= this.create();
+    mount(parent: Element | null) {
+        const element = this.create();
         parent?.append(element);
         this.mounted.call(this, element);
         element.querySelectorAll('[neta]').forEach(child => {
-            child['neta:descriptor']?.mount(null, child);
+            child['neta:descriptor']?.mounted.call(child['neta:descriptor'], child);
         });
         return element;
     },
@@ -32,7 +32,7 @@ export const element = compose<NetaElement>({
     destroy(element: Element) {
         this.destroyed.call(this, element);
         element.querySelectorAll('[neta]').forEach(child => {
-            child['neta:descriptor']?.destroy(child);
+            child['neta:descriptor']?.destroyed.call(child['neta:descriptor'], child);
         });
         return element;
     },

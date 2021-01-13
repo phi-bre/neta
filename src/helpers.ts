@@ -1,12 +1,12 @@
-import { NetaObservable } from './observable';
-import { normalize, snake } from './core';
+import { NetaStyles, styles } from './index';
+import { snake, state } from './core';
 import { element } from './element';
 
 export const html = element({
     create(el?: HTMLElement): HTMLElement {
         el ||= document.createElement(this.tag || 'div');
-        normalize(value => value ? el.innerText = value : null)(this.text);
-        normalize(value => value ? el.innerHTML = value : null)(this.html);
+        state(this.text).then(value => value && (el.innerText = value));
+        state(this.html).then(value => value && (el.innerHTML = value));
         return element.create.call(this, el);
     },
 });
@@ -22,6 +22,8 @@ export function media(value: object): string {
     return `@media screen and (${Object.keys(value).map(key => snake(key) + ':' + value[key]).join(';')})`;
 }
 
-export function state<T>(value: T) {
-    return new NetaObservable<T>(value);
+export function global(descriptor: Record<string, Partial<NetaStyles>>) {
+    for (const key in descriptor) {
+        (styles as any).append({ ['neta:selector']: key, ...descriptor[key] });
+    }
 }

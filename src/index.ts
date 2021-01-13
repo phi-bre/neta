@@ -8,12 +8,12 @@ export type NetaExtendable<D> = { extend(descriptor: D): NetaExtendable<D> };
 export type NetaCallable<T extends NetaExtendable<T>> = T & { (descriptor: Partial<T>): NetaCallable<T> };
 export type NetaPrimitive = string | number | boolean | null | undefined;
 export type NetaHook<T> = (this: NetaElement, element: T) => void;
-export type NetaChild = PromiseLike<NetaChild> | NetaMountable | Node | NetaPrimitive;
+export type NetaChild = NetaCreatable | Node | NetaPrimitive;
 export type NetaAttributes = NetaExtendable<Partial<HTMLElement | SVGElement>>;
 export type NetaStyles = NetaExtendable<Partial<CSSStyleDeclaration> | NetaObservable<Partial<CSSStyleDeclaration>>>;
 export type NetaElement = NetaCreatable & NetaMountable & NetaDestroyable & {
     tag: keyof (HTMLElementTagNameMap & SVGElementTagNameMap);
-    children: Array<NetaChild>;
+    children: Array<NetaChild | PromiseLike<NetaChild> | Array<NetaChild>>;
     attributes: NetaAttributes;
     styles: NetaStyles;
     html?: string | PromiseLike<string>;

@@ -1,31 +1,23 @@
-import { compose, normalize, text } from './core';
-import { NetaCreatable } from './index';
+import { compose, node, state } from './core';
 
 export const children = compose({
     create(element: Element): Element {
-        element['neta:anchors'] = [];
-        this.forEach?.((value, index) => normalize((children, previous = []) => {
-            const length = [].concat(previous).length;
-            const fragment = document.createDocumentFragment();
-            fragment.append(...[].concat(children).map(child =>
-                typeof (child as NetaCreatable)?.create === 'function'
-                    ? (child as NetaCreatable).create()
-                    : child instanceof Node ? child : text(child)
-            ));
-            const anchor = element['neta:anchors'][index];
-            element['neta:anchors'][index] = fragment.firstChild;
-            if (anchor) {
-                for (let i = 1; i < length; i++) {
-                    const sibling = anchor.nextSibling;
-                    sibling?.['neta:descriptor']?.destroy(sibling);
-                    element.removeChild(sibling);
+        this.forEach?.(child => {
+            let anchor: Node = document.createTextNode('');
+            element.append(anchor);
+            state(child).then(child => {
+                const values = [].concat(child);
+                for (let i = 1; i < (anchor['neta:anchor'] || 1); i++) {
+                    element.removeChild(anchor.nextSibling);
                 }
-                element.replaceChild(fragment, anchor);
-                anchor?.['neta:descriptor']?.destroy(anchor);
-            } else {
-                element.append(fragment);
-            }
-        })(value));
+                for (let i = values.length - 2; i >= 0; i--) {
+                    element.insertBefore(node(values[i]), anchor);
+                }
+                const oldAnchor = anchor;
+                element.replaceChild(anchor = node(values[values.length - 1]), oldAnchor);
+                anchor['neta:anchor'] = values.length;
+            });
+        });
         return element;
     },
     extend(descriptor) {
