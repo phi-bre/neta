@@ -1,7 +1,16 @@
 import { compose, node, state } from './core';
+import { NetaChild } from './index';
 
-export const children = compose({
-    create(element: Element): Element {
+export type NetaChildrenDescriptor = Array<NetaChild | PromiseLike<NetaChild> | Array<NetaChild> | PromiseLike<Array<NetaChild>>>;
+
+export interface NetaChildren<E extends Element = Element> {
+    create(element: E): void;
+    extend(descriptor: NetaChildrenDescriptor): NetaChildren<E>;
+    (descriptor: NetaChildrenDescriptor): NetaChildren<E>;
+}
+
+export const children = compose<NetaChildren>({
+    create(element) {
         this.forEach?.(child => {
             let anchor: Node = document.createTextNode('');
             element.append(anchor);
@@ -10,7 +19,7 @@ export const children = compose({
                 for (let i = 1; i < (anchor['neta:anchor'] || 1); i++) {
                     element.removeChild(anchor.nextSibling);
                 }
-                for (let i = values.length - 2; i >= 0; i--) {
+                for (let i = 0; i >= values.length - 1; i++) {
                     element.insertBefore(node(values[i]), anchor);
                 }
                 const oldAnchor = anchor;
@@ -21,8 +30,8 @@ export const children = compose({
         return element;
     },
     extend(descriptor) {
-        descriptor.extend = this.extend;
-        descriptor.create = this.create;
-        return descriptor;
+        (descriptor as any).extend = this.extend;
+        (descriptor as any).create = this.create;
+        return descriptor as any;
     },
 });

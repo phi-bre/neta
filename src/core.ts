@@ -1,22 +1,24 @@
-import { NetaCallable, NetaChild, NetaCreatable, NetaExtendable, NetaPrimitive } from './index';
+import type { NetaChild, NetaComposition, NetaPrimitive } from './index';
 import { NetaObservable } from './observable';
+import { NetaElement } from './element';
 
-export function callable<P extends NetaExtendable<P>>(prototype: P): NetaCallable<P> {
+export function callable<T extends NetaComposition<any, any>>(prototype: T): T {
     const call = descriptor => callable(prototype.extend(descriptor));
     return Object.setPrototypeOf(call, prototype);
 }
 
-export function compose<T extends NetaExtendable<T>>(prototype): NetaCallable<T> {
-    prototype.extend ||= extend;
-    for (const key in prototype) if (prototype[key].extend) {
+export function compose<P extends NetaComposition<any, any>>(prototype: { [K in keyof P]: P[K] }): P {
+    for (const key in prototype) if ((prototype[key] as any).extend) {
         define.call(prototype, key, prototype[key]);
     }
-    return callable(prototype);
+    return callable(prototype as any);
 }
 
 export function extend<P extends object, D extends object>(this: P, descriptor: D): P {
     const instance = Object.create(this);
-    for (const key in descriptor) instance[key] = descriptor[key];
+    for (const key in descriptor) {
+        instance[key] = descriptor[key];
+    }
     return instance;
 }
 
@@ -40,8 +42,8 @@ export function text(value: NetaPrimitive): Text {
 }
 
 export function node(value: NetaChild): Node | Element | Text {
-    return typeof (value as NetaCreatable)?.create === 'function'
-        ? (value as NetaCreatable).create()
+    return typeof (value as NetaElement)?.create === 'function'
+        ? (value as NetaElement).create()
         : value instanceof Node
             ? value : text(value as string);
 }
