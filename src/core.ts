@@ -1,6 +1,5 @@
-import type { NetaChild, NetaComposition, NetaPrimitive } from './index';
+import type { NetaComposition, NetaHTMLElement, NetaSVGElement } from './index';
 import { NetaObservable } from './observable';
-import { NetaElement } from './element';
 
 export function callable<T extends NetaComposition<any, any>>(prototype: T): T {
     const call = descriptor => callable(prototype.extend(descriptor));
@@ -37,19 +36,17 @@ export function define<T>(key: string, value: T, symbol = 'neta:' + key) {
     });
 }
 
-export function text(value: NetaPrimitive): Text {
-    return document.createTextNode(((value !== true && value) || '').toString());
-}
-
-export function node(value: NetaChild): Node | Element | Text {
-    return typeof (value as NetaElement)?.create === 'function'
-        ? (value as NetaElement).create()
-        : value instanceof Node
-            ? value : text(value as string);
-}
-
 export function snake(key: string) {
     return key.replace(/[A-Z]/g, '-$&').toLowerCase();
+}
+
+export function mount(element: NetaHTMLElement | NetaSVGElement) {
+    element.then(value => {
+        element.document.body.append(value);
+        element.document.head.append(element.styles.sheet);
+        element.events.create.initEvent('create', false, true);
+        element.events.destroy.initEvent('destroy', false, true);
+    });
 }
 
 export function state<T>(value: T | PromiseLike<T>): NetaObservable<T> {

@@ -1,12 +1,12 @@
 import type { NetaComposition, NetaHook } from './index';
-import { compose, extend } from './core';
+import { compose, extend, state } from './core';
 import { attributes, NetaAttributes, NetaAttributesDescriptor } from './attributes';
-import { children, NetaChildren, NetaChildrenDescriptor } from './children';
+import { fragment, NetaChildren } from './children';
 import { NetaStyles, NetaStylesDescriptor, styles } from './styles';
-import { hooks } from './hooks';
+import { events, NetaEvents } from './events';
 
 export interface NetaElementDescriptor<E extends Element = Element> {
-    children?: NetaChildrenDescriptor;
+    children?: NetaChildren;
     attributes?: NetaAttributesDescriptor<E>;
     styles?: NetaStylesDescriptor;
     created?: NetaHook<E>;
@@ -16,52 +16,32 @@ export interface NetaElementDescriptor<E extends Element = Element> {
 
 export interface NetaElement<E extends Element = Element>
     extends NetaComposition<NetaElementDescriptor<E>, NetaElement<E>> {
-    children: NetaChildren<E>;
+    document: { body: HTMLElement, head: HTMLHeadElement };
     attributes: NetaAttributes<E>;
     styles: NetaStyles;
-    created: Array<NetaHook<E>>;
-    mounted: Array<NetaHook<E>>;
-    destroyed: Array<NetaHook<E>>;
-    create(element?: E): E;
-    mount(parent?: Element): E;
-    destroy(element: E): E;
+    events: NetaEvents<E>;
+    children: NetaChildren;
+    create(element: E): E;
     extend<T extends Element>(descriptor: NetaElementDescriptor<T>): NetaElement<T>;
     <T extends Element>(descriptor: NetaElementDescriptor<T>): NetaElement<T>;
 }
 
 export const element = compose<NetaElement>({
+    document,
     extend,
     attributes,
-    children,
     styles,
-    created: hooks,
-    create(element) {
-        element['neta:descriptor'] = this;
-        this.attributes.create(element);
-        this.children.create(element);
-        this.styles.create(element);
-        this.created.call(this, element);
-        return element;
-    },
-    mounted: hooks,
-    mount(parent) {
-        const element = this.create();
-        if (parent && document.contains(parent)) {
-            parent.append(element);
-            document.head.append(this.styles.sheet);
+    events,
+    children: [],
+    create(element: HTMLElement) {
+        element.setAttribute('neta', this.styles['neta:id']);
+        for (const key in this.attributes) {
+            state(attributes[key]).then(value => element.setAttribute(key, value));
         }
-        this.mounted.call(this, element);
-        element.querySelectorAll('[neta]').forEach(child => {
-            child['neta:descriptor']?.mounted.call(child['neta:descriptor'], child);
-        });
-        return element;
-    },
-    destroyed: hooks,
-    destroy(element) {
-        this.destroyed.call(this, element);
-        element.querySelectorAll('[neta]').forEach(child => {
-            child['neta:descriptor']?.destroyed.call(child['neta:descriptor'], child);
-        });
+        for (const event of this.events) if (event) {
+            element.addEventListener(event.type, event.listener, event.options);
+        }
+        element.append(fragment(this.children));
         return element;
     },
 });
