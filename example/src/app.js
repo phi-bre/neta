@@ -1,5 +1,6 @@
-import { global, html, state, styles } from '../../src';
+import { html, styles, state, global } from '../../src';
 import readme from '../../README.md';
+import {mount} from '../../src/core';
 
 window.html = html;
 window.state = state;
@@ -29,6 +30,7 @@ global({
 });
 
 const app = html({
+    document,
     styles: {
         fontFamily: '"Montserrat", sans-serif',
         maxWidth: '1000px',
@@ -39,7 +41,7 @@ const app = html({
     html: readme,
 });
 
-app.mount(document.body);
+mount(app);
 
 document.querySelector('h1')?.addEventListener('click', () => {
     dark.set(!dark.value);
