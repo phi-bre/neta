@@ -18,21 +18,26 @@ element and override, mix or extend them in another.
 Note: `neta` relies on the prototype chain to extend partials. This means, property lookups are handled by the browser 🎉
 
 Simple element creation:
+
 ```js
-const app = html({ text: 'Hello World!' });
-app.mount(parent);
+neta.document({
+    body: html({ text: 'Hello World!' })
+});
 ```
 
 You can partially apply a `descriptor` and reuse it:
+
 ```js
 const div = html({ tag: 'div' });
 const red = html({ styles: { color: 'red' } });
-const app = div(red)({
-    children: [
-        div({ text: 'Hello World!' }),
-    ],
+
+neta.document({
+    body: div(red)({
+        children: [
+            div({ text: 'Hello World!' }),
+        ],
+    }),
 });
-app.mount(parent);
 ```
 
 ### Components
@@ -53,12 +58,14 @@ function icon({ url }) {
     });
 }
 
-const app = html({
-    children: [
-        icon({ 
-            url: 'https://picsum.photos/200/300',
-        }),
-    ],
+neta.document({
+    body: html({
+        children: [
+            icon({
+                url: 'https://picsum.photos/200/300',
+            }),
+        ],
+    }),
 });
 app.mount(parent);
 ```
@@ -70,11 +77,14 @@ function similar to a `Promise` really.
 
 ```js
 const time = state();
-const app = html({ children: [time] });
-app.mount(parent);
+
 setInterval(() => {
     time.set(new Date().toLocaleTimeString());
 }, 1000);
+
+neta.document({
+    body: html({ text: time }),
+});
 ```
 
 ## Styling

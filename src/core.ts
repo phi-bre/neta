@@ -1,62 +1,56 @@
-import type { NetaComposition, NetaHTMLElement, NetaSVGElement } from './index';
-import { NetaObservable } from './observable';
+import type { NetaExtendable, NetaDocument } from './index';
+import { fragment } from './element';
 
-export function callable<T extends NetaComposition<any, any>>(prototype: T): T {
-    const call = descriptor => callable(prototype.extend(descriptor));
-    return Object.setPrototypeOf(call, prototype);
+/**
+ * Normalizes a given value into a thenable form. Resolves synchronously for non-thenables values.
+ * This is NOT a polyfill for Promise.resolve, as it does not guarantee a Promise in return.
+ * @param value The value to be resolved
+ */
+export function resolve<T>(value: T | PromiseLike<T>): PromiseLike<T> {
+    return typeof (value as PromiseLike<T>)?.then !== 'function'
+        ? { then: callable => resolve(callable(value as T)) }
+        : value as PromiseLike<T>;
 }
 
-export function compose<P extends NetaComposition<any, any>>(prototype: { [K in keyof P]: P[K] }): P {
-    for (const key in prototype) if ((prototype[key] as any).extend) {
-        define.call(prototype, key, prototype[key]);
-    }
-    return callable(prototype as any);
+/**
+ * Mounts a neta document to a given target.
+ * @param target An object defining the target nodes where body and head should be mounted on
+ * @param body The neta element to mount onto the target's body
+ * @param head The neta element to mount onto the target's head
+ */
+export function document({ target = window.document, body, head }: Partial<NetaDocument>) {
+    // root.events.create.initEvent('create', false, true);
+    // root.events.destroy.initEvent('destroy', false, true);
+    target.body.appendChild(fragment([body]));
+    target.head.appendChild(fragment([head]));
 }
 
-export function extend<P extends object, D extends object>(this: P, descriptor: D): P {
+/**
+ * The default extension strategy used by neta extendable.
+ * Extends the prototype chain and applies all properties of the descriptor.
+ * Used internally.
+ * @param descriptor
+ */
+export function extend<T>(this: NetaExtendable<T>, descriptor: Partial<NetaExtendable<T>>) {
     const instance = Object.create(this);
     for (const key in descriptor) {
-        instance[key] = descriptor[key];
+        instance[key] = this[key] && typeof this[key].extend === 'function'
+            ? this[key].extend(descriptor[key])
+            : descriptor[key];
     }
     return instance;
 }
 
-export function define<T>(key: string, value: T, symbol = 'neta:' + key) {
-    return Object.defineProperties(this, {
-        [symbol]: { value, writable: true },
-        [key]: {
-            enumerable: true,
-            set(value) {
-                this[symbol] = this[symbol].extend(value);
-            },
-            get() {
-                return this[symbol];
-            },
-        },
-    });
+/**
+ * Creates a new extendable instance with the given initial prototype.
+ * Used internally.
+ * @param prototype The initial prototype
+ */
+export function describe<T>(prototype: Partial<NetaExtendable<T>>): NetaExtendable<T> {
+    const instance = descriptor => describe((prototype.extend || extend).call(prototype, descriptor));
+    return Object.setPrototypeOf(instance, prototype);
 }
 
-export function snake(key: string) {
-    return key.replace(/[A-Z]/g, '-$&').toLowerCase();
-}
-
-export function mount(element: NetaHTMLElement | NetaSVGElement) {
-    element.then(value => {
-        element.document.body.append(value);
-        element.document.head.append(element.styles.sheet);
-        element.events.create.initEvent('create', false, true);
-        element.events.destroy.initEvent('destroy', false, true);
-    });
-}
-
-export function state<T>(value: T | PromiseLike<T>): NetaObservable<T> {
-    if (value instanceof Promise) {
-        const observable = new NetaObservable(undefined);
-        Promise.resolve(value).then(observable.set);
-        return observable;
-    } else if (value instanceof NetaObservable) {
-        return value;
-    } else {
-        return new NetaObservable(value as T);
-    }
-}
+// TODO: Create object from actual prototype and new keyword without the need for .setPrototypeOf and .create
+// describe.prototype
+// describe.extend = extend

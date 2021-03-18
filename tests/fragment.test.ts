@@ -1,48 +1,55 @@
-import { element } from '../src/element';
-import { fragment } from '../src/children';
+import { fragment } from '../src/element';
 
-describe('element', function () {
-    describe('children', function () {
-        // describe('when empty', function () {
-        //     const instance = fragment([]);
-        //
-        //     it('should contain an anchor', function () {
-        //         expect(instance.childNodes).toHaveLength(1);
-        //         expect((instance.firstChild as Text).data).toEqual('');
-        //     });
-        // });
+describe('fragment', function () {
+    describe('when passed a primitive', function () {
+        const values = ['string', '', 1, 0];
 
-        describe('when passed a primitive', function () {
-            const text = 'text';
-            const element = fragment([text]);
+        it('should map to text node', function () {
+            expect([...fragment(values).childNodes]).toEqual(values.map(value => new Text(value.toString())));
+        });
+    });
 
-            it('should contain it as a child', async function () {
-                expect(element.childNodes).toHaveLength(1);
-                await element.firstChild;
-                expect((element.firstChild as Text).data).toEqual(text);
-            });
+    describe('when passed an empty primitive', function () {
+        const values = ['', true, false, null, undefined];
+
+        it('should map to empty text node', function () {
+            expect([...fragment(values).childNodes]).toEqual(values.map(() => new Text()));
+        });
+    });
+
+    describe('when passed an array', function () {
+        const values = [['first', 'second']];
+
+        it('should contain its values as direct children', function () {
+            expect([...fragment(values).childNodes]).toEqual(values[0].map(value => new Text(value)));
+        });
+    });
+
+    describe('when passed a node', function () {
+        const values = [document.createElement('div')];
+
+        it('should keep as node', function () {
+            expect([...fragment(values).childNodes]).toEqual(values);
+        });
+    });
+
+    describe('when passed a thenable', function () {
+        const value = 'string';
+        const thenable = Promise.resolve(value);
+        const element = fragment([thenable]);
+
+        it('should keep as node', async function () {
+            expect(element.firstChild).toEqual(new Text());
+            await thenable;
+            expect(element.firstChild).toEqual(new Text(value));
         });
 
-        describe('when passed an array', function () {
-            const array = ['first', 'second'];
-            const element = fragment([array]);
+        describe('remove', function () {
 
-            it('should contain its values as direct children', async function () {
-                expect(element.childNodes).toHaveLength(1);
-                await Promise.all(element.childNodes);
-                for (const childNode of element.childNodes) {
-                    console.log(childNode);
-                }
-                expect(Array.from(element.childNodes).map((text: Text) => text.data)).toContain(array);
-            });
         });
 
-        describe('when passed a promise', function () {
-            const array = ['first', 'second'];
-            const element = fragment([array]);
+        describe('update', function () {
 
-            it('should contain its values as direct children', async function () {
-            });
         });
     });
 });

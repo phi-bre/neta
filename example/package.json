@@ -1,17 +1,16 @@
 {
-  "name": "neta.dev",
+  "name": "neta.phibre.dev",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "build": "parcel build index.html",
-    "start": "parcel index.html"
+    "start": "parcel serve index.html",
+    "build": "parcel build index.html"
   },
   "dependencies": {
     "highlight.js": "^10.5.0"
   },
   "devDependencies": {
-    "parcel": "^1.12.4",
-    "marked": "^1.2.7"
+    "parcel": "next"
   },
   "browserslist": [
     "since 2017-06"

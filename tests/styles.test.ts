@@ -1,14 +1,14 @@
-import { styles } from '../src/styles';
+import { style } from '../src/styles';
 
 describe('styles', function () {
     beforeEach(() => {
-        styles.index = 0;
+        style.index = 0;
     });
 
     describe('#create', function () {
         it('should set the attribute "neta" to the sum of indexes', function () {
             const element = document.createElement('div');
-            styles({ color: '#fff' }).create(element);
+            style({ color: '#fff' }).create(element);
             expect(element.getAttribute('neta')).toEqual('\u20601\u2060');
         });
     });
@@ -18,28 +18,28 @@ describe('styles', function () {
             const descriptor = { color: '#fff' };
 
             it('should increase index', function () {
-                styles(descriptor)(descriptor);
-                expect(styles.index).toEqual(1);
+                style(descriptor)(descriptor);
+                expect(style.index).toEqual(1);
             });
 
             it('should call append with the passed descriptor', function () {
-                const append = jest.spyOn(styles, 'append');
-                styles(descriptor);
+                const append = jest.spyOn(style, 'append');
+                style(descriptor);
                 expect(append).toBeCalledWith(descriptor);
             });
         });
 
         describe('when descriptor is another styles', function () {
-            const descriptor = styles({ color: '#fff' });
+            const descriptor = style({ color: '#fff' });
 
             it('should merge the ids', function () {
-                const merged = styles(descriptor);
+                const merged = style(descriptor);
                 expect(merged['neta:selector']).toEqual('');
             });
 
             it('should NOT call append', function () {
-                const append = jest.spyOn(styles, 'append');
-                styles(descriptor);
+                const append = jest.spyOn(style, 'append');
+                style(descriptor);
                 expect(append).not.toBeCalled();
             });
         });
