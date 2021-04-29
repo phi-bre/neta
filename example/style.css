@@ -1,0 +1,58 @@
+* {
+    transition: background-color 0.2s, color 0.1s;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: "Fira Sans", sans-serif;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Montserrat", sans-serif;
+    margin-top: 32px;
+    margin-bottom: 16px;
+    cursor: pointer;
+}
+
+p {
+    font-size: 16px;
+    margin-bottom: 16px;
+    line-height: 28px;
+}
+
+a {
+    text-decoration: none;
+    color: #5dadff;
+    transition: 0.2s;
+}
+
+a:hover {
+    opacity: 0.8;
+}
+
+code {
+    font-family: "Fira Code", monospace;
+    border-radius: 4px;
+    padding: 2px 6px;
+    width: 60%;
+    max-width: 60%;
+    overflow-x: hidden;
+    /* backgroundColor: shade; */
+    /* color: color; */
+}
+
+body {
+    background-color: background;
+    /* color: color; */
+}
+
+pre code {
+    background-color: #292d2e;
+    color: #e5e5e5;
+    padding: 32px;
+}
+
+pre {
+    display: flex;
+}

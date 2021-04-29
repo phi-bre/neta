@@ -3,16 +3,14 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "parcel serve index.html",
-    "build": "parcel build index.html"
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
   },
   "dependencies": {
     "highlight.js": "^10.5.0"
   },
   "devDependencies": {
-    "parcel": "next"
-  },
-  "browserslist": [
-    "since 2017-06"
-  ]
+    "vite": "^2.2.3"
+  }
 }
