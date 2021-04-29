@@ -50,7 +50,3 @@ export function describe<T>(prototype: Partial<NetaExtendable<T>>): NetaExtendab
     const instance = descriptor => describe((prototype.extend || extend).call(prototype, descriptor));
     return Object.setPrototypeOf(instance, prototype);
 }
-
-// TODO: Create object from actual prototype and new keyword without the need for .setPrototypeOf and .create
-// describe.prototype
-// describe.extend = extend

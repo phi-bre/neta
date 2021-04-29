@@ -24,14 +24,3 @@ export function state<T>(value: T): NetaObservable<T> {
     resolve(value).then(observable.set.bind(observable));
     return observable;
 }
-
-// export function combine<T>(...values: Array<NetaObservable<T>>): NetaObservable<Array<T>> {
-//     const observable = state([]);
-//     for (let i = 0; i < values.length; i++){
-//         resolve(values[i]).then(value => {
-//             observable.value[i] = value;
-//             observable.set(observable.value);
-//         });
-//     }
-//     return observable;
-// }

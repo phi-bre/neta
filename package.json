@@ -1,7 +1,7 @@
 {
   "name": "@phibre/neta",
   "description": "A lightweight JS framework powered by the prototype chain.",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": {
     "name": "Philip Breuer",
     "url": "https://phibre.dev"
