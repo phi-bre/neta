@@ -1,4 +1,4 @@
-import { style } from '../src/styles';
+import { style } from '../src/style';
 
 describe('styles', function () {
     beforeEach(() => {

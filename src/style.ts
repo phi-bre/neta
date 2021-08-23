@@ -1,5 +1,6 @@
-import type { NetaStyles, NetaStylesDescriptor } from './index';
-import { describe } from './core';
+import type { NetaElementDescriptor, NetaStyles, NetaStylesDescriptor } from './index';
+import { describe, resolve } from './core';
+import { element } from './index';
 
 export let index = 0;
 
@@ -34,14 +35,3 @@ export let index = 0;
     //     },
     // });
 // }
-
-const prototype = describe({
-    selector: '',
-    styles: describe<object>({}),
-    pseudo: describe<object>({}),
-    media: describe<object>({}),
-});
-
-export function style(descriptor) {
-    return prototype(descriptor);
-}

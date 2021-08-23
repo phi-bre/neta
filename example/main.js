@@ -1,8 +1,105 @@
 // import readme from '../README.md?raw';
 import * as neta from '../src';
+import { describe, resolve } from '../src';
+import { extend } from '../src/core';
 
 window.neta = neta;
-document.body.innerText = 'Temporarily unavailable';
+
+const h1 = neta.element({
+    attributes: {
+        style: 'margin: 0px',
+        title: 'hello',
+    },
+});
+
+const h2 = h1({
+    attributes: {
+        title: 'nope',
+    },
+});
+
+const styles = neta.element({
+    selector: '-',
+    styles: describe({
+        // pseudo: describe({}),
+        // media: describe({}),
+    }),
+    extend(descriptor) {
+        if (descriptor.styles) {
+            descriptor.selector = this.selector + String(descriptor.selector || Math.random().toString(16).substr(2, 6)) + '-';
+            function append(selector, descriptor) {
+                return resolve(descriptor).then(descriptor => {
+                    const children = [];
+                    for (const key in descriptor) {
+                        children.push(
+                            resolve(descriptor[key]).then(value => {
+                                const children = [];
+                                const type = typeof value;
+                                if (type === 'object' && value !== null) {
+                                    children.push(...append(selector + key, descriptor));
+                                } else if (value && !key.startsWith('neta:')) {
+                                    children.push(`${selector}{${key.replace(/[A-Z]/g, '-$&').toLowerCase()}:${value}}`);
+                                }
+                                return children;
+                            }),
+                        );
+                    }
+                    return children;
+                });
+            }
+
+            const children = append(descriptor.selector, descriptor.styles);
+            neta.element({ tag: 'style', children }).then(style => document.head.appendChild(style));
+        }
+        return extend.call(this, descriptor);
+    },
+    then(fulfill) {
+        console.log(this.prototype);
+        return this.prototype.then.call(this, element => {
+            console.log(this.selector);
+            element.setAttribute('neta', this.selector);
+            return fulfill(element);
+        });
+    },
+});
+
+const dark = neta.state(true);
+setInterval(() => dark.set(!dark.value), 1000);
+
+const styledDiv = styles({
+    styles: {
+        // backgroundColor: dark.then(dark => dark ? 'white' : 'black'),
+    },
+    text: 'asdasd',
+});
+
+console.log(styledDiv.selector);
+console.log(styles.then(a => console.log(a)));
+
+
+neta.document({
+    head: neta.element({
+        tag: 'style',
+        children: [
+            // dark.then(dark => `html { background-color: ${dark ? 'white' : 'black'}; }`),
+        ],
+    }),
+    body: neta.element({
+        styles: {
+            fontFamily: '"Montserrat", sans-serif',
+            maxWidth: '1000px',
+            marginRight: 'auto',
+            marginLeft: 'auto',
+            padding: '48px',
+            color: '#000',
+        },
+        children: [
+            dark.then(dark => `html { background-color: ${dark ? 'white' : 'black'}; }`),
+            // h2({ text: dark }),
+            styledDiv({ text: 'asds' }),
+        ],
+    }),
+});
 
 // const dark = neta.state(false);
 // const background = dark.then(dark => dark ? '#242628' : '#f5f5f5');

@@ -1,5 +1,4 @@
-import type { NetaExtendable, NetaDocument } from './index';
-import { fragment } from './element';
+import type { NetaExtendable } from './index';
 
 /**
  * Normalizes a given value into a thenable form. Resolves synchronously for non-thenables values.
@@ -13,19 +12,6 @@ export function resolve<T>(value: T | PromiseLike<T>): PromiseLike<T> {
 }
 
 /**
- * Mounts a neta document to a given target.
- * @param target An object defining the target nodes where body and head should be mounted on
- * @param body The neta element to mount onto the target's body
- * @param head The neta element to mount onto the target's head
- */
-export function document({ target = window.document, body, head }: Partial<NetaDocument>) {
-    // root.events.create.initEvent('create', false, true);
-    // root.events.destroy.initEvent('destroy', false, true);
-    target.body.appendChild(fragment([body]));
-    target.head.appendChild(fragment([head]));
-}
-
-/**
  * The default extension strategy used by neta extendable.
  * Extends the prototype chain and applies all properties of the descriptor.
  * Used internally.
@@ -33,8 +19,9 @@ export function document({ target = window.document, body, head }: Partial<NetaD
  */
 export function extend<T>(this: NetaExtendable<T>, descriptor: Partial<NetaExtendable<T>>) {
     const instance = Object.create(this);
+    instance.prototype = this;
     for (const key in descriptor) {
-        instance[key] = this[key] && typeof this[key].extend === 'function'
+        instance[key] = typeof this[key]?.extend === 'function'
             ? this[key].extend(descriptor[key])
             : descriptor[key];
     }
@@ -47,6 +34,7 @@ export function extend<T>(this: NetaExtendable<T>, descriptor: Partial<NetaExten
  * @param prototype The initial prototype
  */
 export function describe<T>(prototype: Partial<NetaExtendable<T>>): NetaExtendable<T> {
-    const instance = descriptor => describe((prototype.extend || extend).call(prototype, descriptor));
+    prototype.extend ||= extend;
+    const instance = descriptor => describe((prototype.extend).call(prototype, descriptor));
     return Object.setPrototypeOf(instance, prototype);
 }

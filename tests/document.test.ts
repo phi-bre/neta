@@ -1,4 +1,4 @@
-import { fragment } from '../src/element';
+import { fragment } from '../src/document';
 
 describe('fragment', function () {
     describe('when passed a primitive', function () {
@@ -39,6 +39,7 @@ describe('fragment', function () {
         const element = fragment([thenable]);
 
         it('should keep as node', async function () {
+            console.log(element.firstChild);
             expect(element.firstChild).toEqual(new Text());
             await thenable;
             expect(element.firstChild).toEqual(new Text(value));
