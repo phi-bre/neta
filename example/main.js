@@ -19,14 +19,18 @@ const h2 = h1({
 });
 
 const styles = neta.element({
-    selector: '-',
-    styles: describe({
-        // pseudo: describe({}),
-        // media: describe({}),
-    }),
+    attributes: {
+        neta: '-',
+    },
     extend(descriptor) {
-        if (descriptor.styles) {
-            descriptor.selector = this.selector + String(descriptor.selector || Math.random().toString(16).substr(2, 6)) + '-';
+        console.log(this.prototype);
+        debugger
+        const instance = this.prototype.extend.call(this, descriptor);
+        const selector = descriptor.neta || Math.random().toString(16).substr(2, 6);
+        const name = this.attributes.neta + selector + '-';
+        if (descriptor.styles && !document.head.querySelector(`[neta*="-${selector}-"]`)) {
+            instance.styles = {};
+            instance.attributes.neta = name;
             function append(selector, descriptor) {
                 return resolve(descriptor).then(descriptor => {
                     const children = [];
@@ -36,7 +40,7 @@ const styles = neta.element({
                                 const children = [];
                                 const type = typeof value;
                                 if (type === 'object' && value !== null) {
-                                    children.push(...append(selector + key, descriptor));
+                                    children.push(...append(selector + key, value));
                                 } else if (value && !key.startsWith('neta:')) {
                                     children.push(`${selector}{${key.replace(/[A-Z]/g, '-$&').toLowerCase()}:${value}}`);
                                 }
@@ -48,18 +52,11 @@ const styles = neta.element({
                 });
             }
 
-            const children = append(descriptor.selector, descriptor.styles);
-            neta.element({ tag: 'style', children }).then(style => document.head.appendChild(style));
+            const children = append(`[neta*="-${selector}-"]`, descriptor.styles);
+            neta.element({ tag: 'style', children, attributes: { neta: name } })
+                .then(style => document.head.appendChild(style));
         }
-        return extend.call(this, descriptor);
-    },
-    then(fulfill) {
-        console.log(this.prototype);
-        return this.prototype.then.call(this, element => {
-            console.log(this.selector);
-            element.setAttribute('neta', this.selector);
-            return fulfill(element);
-        });
+        return instance;
     },
 });
 
@@ -67,15 +64,17 @@ const dark = neta.state(true);
 setInterval(() => dark.set(!dark.value), 1000);
 
 const styledDiv = styles({
-    styles: {
-        // backgroundColor: dark.then(dark => dark ? 'white' : 'black'),
-    },
+    styles: dark.then(dark => dark ? {
+        backgroundColor: 'white',
+        color: 'black',
+    } : {
+        backgroundColor: 'black',
+        color: 'white',
+    }),
     text: 'asdasd',
 });
 
-console.log(styledDiv.selector);
-console.log(styles.then(a => console.log(a)));
-
+console.log(styledDiv.attributes);
 
 neta.document({
     head: neta.element({
