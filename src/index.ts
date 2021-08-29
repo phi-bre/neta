@@ -2,6 +2,7 @@ export { describe, resolve } from './core';
 export { element } from './element';
 export { state } from './state';
 export { document } from './document';
+export { styled, stylesheet } from './style';
 
 export type NetaObserver<T, R = any> = (value: T) => R;
 export type NetaPrimitive = string | number | bigint | boolean | null | undefined;

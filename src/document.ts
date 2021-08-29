@@ -44,9 +44,15 @@ export function fragment(values: Array<NetaChild>): DocumentFragment {
  * @param body The neta element to mount onto the target's body
  * @param head The neta element to mount onto the target's head
  */
-export function document({ target = window.document, body, head }: Partial<NetaDocument>) {
+export function document({ target = window.document, body, head, ...properties }: Partial<NetaDocument>) {
     // root.events.create.initEvent('create', false, true);
     // root.events.destroy.initEvent('destroy', false, true);
+    
+    for (const key in properties) {
+        resolve(properties[key]).then(value => {
+            target[key] = value;
+        });
+    }
     target.head.appendChild(fragment([head]));
     target.body.appendChild(fragment([body]));
 }

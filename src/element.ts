@@ -1,5 +1,5 @@
 import type { NetaAttributes, NetaElement, NetaElementDescriptor, NetaElementTagNameMap, NetaStyles } from './index';
-import { describe, extend, resolve } from './core';
+import { describe, resolve } from './core';
 import { node } from './document';
 
 export function create(fulfill) {
@@ -47,9 +47,5 @@ export const element = describe<NetaElement>({
     styles: describe<NetaStyles>({}),
     // events,
     children: [],
-    then: Object.assign(create, {
-        extend(descriptor) {
-
-        },
-    }),
+    then: create,
 });
