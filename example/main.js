@@ -1,89 +1,92 @@
-// import readme from '../README.md?raw';
 import * as neta from '../src';
-import { describe, resolve } from '../src';
-import { extend } from '../src/core';
 
 window.neta = neta;
 
-const h1 = neta.element({
-    attributes: {
-        style: 'margin: 0px',
-        title: 'hello',
+const $dark = neta.state(true);
+const $theme = $dark.then(dark => dark ? {
+    primary: '#eee',
+    secondary: '#111',
+} : {
+    primary: '#eee',
+    secondary: '#111',
+});
+const $time = neta.state(new Date());
+
+
+neta.state($time, $dark)
+    .then((time, dark) => console.log(time, dark));
+
+setInterval(() => {
+    $time.set(new Date());
+}, 1000);
+
+const div = neta.styled({
+    styles: {
+        // backgroundColor: $dark.then(dark => dark ? 'white' : 'black'),
+        // color: $dark.then(dark => dark ? 'black' : 'white'),
+    },
+    text: 'Hello!',
+});
+
+const centered = neta.styled({
+    neta: 'centered',
+    styles: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });
 
-const h2 = h1({
-    attributes: {
-        title: 'nope',
-    },
-});
-
-const styles = neta.element({
-    attributes: {
-        neta: '-',
-    },
-    extend(descriptor) {
-        console.log(this.prototype);
-        debugger
-        const instance = this.prototype.extend.call(this, descriptor);
-        const selector = descriptor.neta || Math.random().toString(16).substr(2, 6);
-        const name = this.attributes.neta + selector + '-';
-        if (descriptor.styles && !document.head.querySelector(`[neta*="-${selector}-"]`)) {
-            instance.styles = {};
-            instance.attributes.neta = name;
-            function append(selector, descriptor) {
-                return resolve(descriptor).then(descriptor => {
-                    const children = [];
-                    for (const key in descriptor) {
-                        children.push(
-                            resolve(descriptor[key]).then(value => {
-                                const children = [];
-                                const type = typeof value;
-                                if (type === 'object' && value !== null) {
-                                    children.push(...append(selector + key, value));
-                                } else if (value && !key.startsWith('neta:')) {
-                                    children.push(`${selector}{${key.replace(/[A-Z]/g, '-$&').toLowerCase()}:${value}}`);
-                                }
-                                return children;
-                            }),
-                        );
-                    }
-                    return children;
+function slider(max, $index) {
+    const size = 40;
+    return centered({
+        styles: {
+            transition: 'margin-top 0.2s',
+            margin: 'auto 2px',
+            marginTop: $index.then(index => -index * size + 'px'),
+        },
+        children: [
+            new Array(max).fill(0).map((_, i) => {
+                const $selected = $index.then(index => index === i);
+                return centered({
+                    styles: {
+                        // transition: 'background-color 0.1s',
+                        // backgroundColor: neta.derive($selected, $theme)
+                        //     .then(([selected, theme]) => selected ? theme.primary : theme.secondary),
+                        // color: neta.derive($selected, $theme)
+                        //     .then(([selected, theme]) => selected ? theme.primary : theme.secondary),
+                        borderRadius: `${size}px`,
+                        lineHeight: `${size}px`,
+                        fontWeight: 'bold',
+                        width: `${size}px`,
+                        height: `${size}px`,
+                    },
+                    text: String(i),
                 });
-            }
-
-            const children = append(`[neta*="-${selector}-"]`, descriptor.styles);
-            neta.element({ tag: 'style', children, attributes: { neta: name } })
-                .then(style => document.head.appendChild(style));
-        }
-        return instance;
-    },
-});
-
-const dark = neta.state(true);
-setInterval(() => dark.set(!dark.value), 1000);
-
-const styledDiv = styles({
-    styles: dark.then(dark => dark ? {
-        backgroundColor: 'white',
-        color: 'black',
-    } : {
-        backgroundColor: 'black',
-        color: 'white',
-    }),
-    text: 'asdasd',
-});
-
-console.log(styledDiv.attributes);
+            }),
+        ],
+    });
+}
 
 neta.document({
-    head: neta.element({
-        tag: 'style',
-        children: [
-            // dark.then(dark => `html { background-color: ${dark ? 'white' : 'black'}; }`),
-        ],
+    title: 'Clockinator',
+    head: neta.stylesheet({
+        styles: {
+            '*': {
+                // 'background-color': 'black',
+                // ':hover': {
+                    // 'background-color': 'white',
+                // },
+            },
+        },
     }),
-    body: neta.element({
+    body: centered({
+        attributes: {
+            onclick() {
+                $dark.set(!$dark.value);
+            },
+        },
         styles: {
             fontFamily: '"Montserrat", sans-serif',
             maxWidth: '1000px',
@@ -91,11 +94,26 @@ neta.document({
             marginLeft: 'auto',
             padding: '48px',
             color: '#000',
+            height: '100vh',
         },
         children: [
-            dark.then(dark => `html { background-color: ${dark ? 'white' : 'black'}; }`),
-            // h2({ text: dark }),
-            styledDiv({ text: 'asds' }),
+            neta.styled({
+                styles: {
+                    display: 'flex',
+                    alignItems: 'start',
+                    marginTop: '50%',
+                },
+                children: [
+                    div
+                    // slider(3, $time.then(time => Number(time.getHours().toString()[0] || '0'))),
+                    // slider(10, $time.then(time => Number(time.getHours().toString()[1] || '0'))),
+                    // slider(6, $time.then(time => Number(time.getMinutes().toString()[0] || '0'))),
+                    // slider(10, $time.then(time => Number(time.getMinutes().toString()[1] || '0'))),
+                    // slider(6, $time.then(time => Number(time.getSeconds().toString()[0] || '0'))),
+                    // slider(10, $time.then(time => Number(time.getSeconds().toString()[1] || '0'))),
+                ],
+            }),
+            // time.then(time => time.toLocaleTimeString()),
         ],
     }),
 });

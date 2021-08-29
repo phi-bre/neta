@@ -21,15 +21,15 @@ Simple element creation:
 
 ```js
 neta.document({
-    body: html({ text: 'Hello World!' })
+    body: neta.element({ text: 'Hello World!' })
 });
 ```
 
 You can partially apply a `descriptor` and reuse it:
 
 ```js
-const div = html({ tag: 'div' });
-const red = html({ styles: { color: 'red' } });
+const div = neta.element({ tag: 'div' });
+const red = neta.element({ styles: { color: 'red' } });
 
 neta.document({
     body: div(red)({
@@ -47,7 +47,7 @@ or make invocations only when you actually need them.
 ```js
 function icon({ url }) {
     // Do something here
-    return html({
+    return neta.element({
         tag: 'img',
         attributes: {
             src: url,
@@ -59,12 +59,8 @@ function icon({ url }) {
 }
 
 neta.document({
-    body: html({
-        children: [
-            icon({
-                url: 'https://picsum.photos/200/300',
-            }),
-        ],
+    body: icon({
+        url: 'https://picsum.photos/200/300',
     }),
 });
 app.mount(parent);
@@ -83,7 +79,9 @@ setInterval(() => {
 }, 1000);
 
 neta.document({
-    body: html({ text: time }),
+    body: neta.element({ 
+        text: time,
+    }),
 });
 ```
 
