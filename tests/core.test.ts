@@ -1,7 +1,7 @@
 import { resolve, extend, describe as desc } from '../src/core';
 
 describe('resolve', function () {
-    let value;
+    let value: any;
 
     describe('when passed anything but a thenable', function () {
         beforeEach(function () {
@@ -31,7 +31,7 @@ describe('resolve', function () {
 });
 
 describe('extend', function () {
-    let prototype, descriptor, extended;
+    let prototype: any, descriptor: any, extended: any;
 
     describe('when passed a plain object', function () {
         beforeEach(function () {
@@ -63,7 +63,7 @@ describe('extend', function () {
 });
 
 describe('describe', function () {
-    let prototype, descriptor, instance;
+    let prototype: any, descriptor: any, instance: any;
 
     describe('when prototype is a plain object', function () {
         beforeEach(function () {
