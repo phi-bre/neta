@@ -17,15 +17,25 @@ export function is_primitive<T>(value: any): value is string | number | bigint |
   );
 }
 
+export function state<T>(value: T | PromiseLike<T>) {
+  return {
+    listeners: [],
+    set(value) {
+
+    },
+    then(callable) {
+
+    },
+  };
+}
+
 /**
  * Recursively normalizes a given value into a thenable form. Resolves synchronously if possible.
  * This is NOT a polyfill for Promise.resolve, as it does not guarantee a Promise in return.
  * @param value the value to be resolved
  */
 export function resolve<T>(value: T | PromiseLike<T>): PromiseLike<T> {
-  if (is_thenable(value)) {
-    return { then: callable => resolve(value.then(callable)) };
-  }
+  if (is_thenable(value)) return value;
   return { then: callable => resolve(callable(value)) };
 }
 
@@ -74,51 +84,76 @@ export function flattened<T>(value: T | PromiseLike<T>): PromiseLike<T[]> {
   };
 }
 
-export function layered<T extends object>(prototype: T | PromiseLike<T>): PromiseLike<Partial<T>> {
-  return {
-    then(callable) {
-      const instance: Partial<T> = {};
-      resolve(prototype).then(prototype => {
-        for (const key in prototype) {
-          resolve(prototype[key]).then(property => {
-            instance[key] = property;
-            callable(prototype);
-          });
-        }
-      });
-      return layered(callable(instance));
-    }
-  };
+export function layered<T extends object>(value: T | PromiseLike<T>): PromiseLike<T> {
+
 }
 
-layered({
-  attrs: layered({
-    name: resolve('delayed')
-  }),
-  created: middleware((element) => {
-    console.log('created');
-  })
-}).then(() => ({
-  attrs: {
-    another: 10
-  },
-  created(element) {
+export function nested<T extends object>(value: T | PromiseLike<T>): PromiseLike<Partial<T>> {
+  const cache: Partial<T> = {};
+  const listeners = [];
+  resolve(value).then(value => {
+    for (const key in value) {
+      resolve(value[key]).then(property => {
+        cache[key] = property;
+        listeners.forEach(listener => listener(cache));
+      });
+    }
+  });
+  return {
+    then(callable) {
+      listeners.push(callable);
+      return nested(cache);
+    },
+  };
 
-    return element;
-  },
-}));
+  // return resolve(prototype).then(value => {
+  //   const result: Partial<T> = {};
+  //   for (const key in value) {
+  //     resolve(value[key]).then(property => {
+  //       console.log(property);
+  //       result[key] = property;
+  //       // TODO: Trigger
+  //     });
+  //   }
+  //   return result;
+  // });
+}
 
-describe(
-  layered({
-    attrs: layered({
-      name: resolve('delayed')
-    }),
-  }),
-)({
-  attrs: {
-    another: 10
-  }
-})
+const a = nested({ a: 'a', b: Promise.resolve(10) })
+    .then(a => ({}));
+
+a.then(a => {
+  console.log(a);
+});
+
+// nested({
+//   attrs: nested({
+//     name: resolve('delayed')
+//   }),
+//   created: middleware((element) => {
+//     console.log('created');
+//   })
+// }).then(() => ({
+//   attrs: {
+//     another: 10
+//   },
+//   created(element) {
+//
+//     return element;
+//   },
+// }));
+//
+// describe(
+//   nested({
+//     attrs: nested({
+//       name: resolve('delayed')
+//     }),
+//   }),
+// )({
+//   attrs: {
+//     another: 10
+//   }
+// })
 
 type Reflective<T> = PromiseLike<T> & {
   <R>(descriptor: R | PromiseLike<R>): PromiseLike<R>;
